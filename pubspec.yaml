@@ -37,6 +37,7 @@ dependencies:
   cupertino_icons: ^1.0.6
   animated_splash_screen: ^1.3.0
   url_launcher: ^6.3.0
+  image_picker: ^0.8.4+4
 
 dev_dependencies:
   flutter_test:
@@ -84,7 +85,9 @@ flutter:
     - assets/ride_icon.png
     - assets/food_icon.png
     - assets/kost-icon.png
-
+    - assets/gambar-ganti-password.png
+    - assets/gambar-ganti-password.jpg
+    
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
 

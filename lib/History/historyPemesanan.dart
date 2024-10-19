@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, avoid_unnecessary_containers, prefer_const_constructors_in_immutables, use_super_parameters
 
 import 'package:flutter/material.dart';
 import 'package:staygo/ojek/detailojek.dart';
@@ -11,7 +11,7 @@ class HistoryPemesanan extends StatefulWidget {
 }
 
 class _HistoryPemesananState extends State<HistoryPemesanan> {
-  String selectedOption = 'Ride';
+  String selectedOption = 'Ojek';
 
   final List<Map<String, String>> items = [
     {'name': 'Irvan', 'gender': 'Cowok', 'image': 'assets/kos2.png'},

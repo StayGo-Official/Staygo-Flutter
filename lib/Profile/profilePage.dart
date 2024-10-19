@@ -1,12 +1,25 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, file_names
 
 import 'package:flutter/material.dart';
-import 'package:staygo/Beranda/beranda.dart';
+import 'package:staygo/Profile/editProfile.dart';
+import 'package:staygo/Profile/konfirmasiEmail.dart';
+import 'package:staygo/Profile/resetPassword.dart';
 import 'package:staygo/loginpage.dart';
 import 'package:staygo/navigationBottom.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Profilepage extends StatelessWidget {
   const Profilepage({super.key});
+
+  void _launchPlayStore() async {
+  const url =
+      'https://play.google.com'; // Ganti 'com.example.staygo' dengan ID aplikasi Play Store yang ingin dibuka
+  if (await canLaunch(url)) {
+    await launch(url);
+  } else {
+    throw 'Could not launch $url';
+  }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -184,7 +197,14 @@ class Profilepage extends StatelessWidget {
               title: Text('Ubah Data Akun'),
               trailing: Icon(Icons.arrow_forward_ios, size: 16),
               onTap: () {
-                // Navigate or perform actions
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) {
+                      return EditProfile();
+                    },
+                  ),
+                );
               },
             ),
             ListTile(
@@ -193,16 +213,30 @@ class Profilepage extends StatelessWidget {
               title: Text('Verifikasi Email'),
               trailing: Icon(Icons.arrow_forward_ios, size: 16),
               onTap: () {
-                // Navigate or perform actions
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) {
+                      return KonfirmasiEmail();
+                    },
+                  ),
+                );
               },
             ),
             ListTile(
               leading: Icon(Icons.lock_outlined,
                   color: Colors.black), // Change icon as needed
-              title: Text('Tambahkan Authentication'),
+              title: Text('Ganti Password'),
               trailing: Icon(Icons.arrow_forward_ios, size: 16),
               onTap: () {
-                // Navigate or perform actions
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) {
+                      return ResetPassword();
+                    },
+                  ),
+                );
               },
             ),
 
@@ -238,7 +272,7 @@ class Profilepage extends StatelessWidget {
               title: Text('Beri Rating'),
               trailing: Icon(Icons.arrow_forward_ios, size: 16),
               onTap: () {
-                // Navigate or perform actions
+                _launchPlayStore();
               },
             ),
             ListTile(

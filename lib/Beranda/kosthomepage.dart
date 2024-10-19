@@ -1,10 +1,7 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, sized_box_for_whitespace, camel_case_types
 
 import 'package:flutter/material.dart';
-import 'package:staygo/Beranda/beranda.dart';
 import 'package:staygo/Favorite/favorite.dart';
-import 'package:staygo/History/historyPemesanan.dart';
-import 'package:staygo/Profile/profilePage.dart';
 import 'package:staygo/kost/detailkost.dart';
 
 class kostHomepage extends StatefulWidget {
@@ -75,7 +72,14 @@ class _kostHomepageState extends State<kostHomepage> {
                   // Icons for Favorite and Notifications
                   IconButton(
                     onPressed: () {
-                      // Handle favorite button press
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) {
+                              return FavoritePage();
+                            },
+                          ),
+                        );
                     },
                     icon:
                         Icon(Icons.favorite_outline, color: Color(0xFF05283c)),
@@ -83,7 +87,25 @@ class _kostHomepageState extends State<kostHomepage> {
                   ),
                   IconButton(
                     onPressed: () {
-                      // Handle notification button press
+                      // Tampilkan pop-up dialog ketika ikon notifikasi ditekan
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: Text('Notifikasi'),
+                            content: Text(
+                                'Tidak ada notifikasi baru saat ini.'), // Pesan dalam pop-up
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop(); // Tutup dialog
+                                },
+                                child: Text('Tutup'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
                     },
                     icon: Icon(Icons.notifications_outlined,
                         color: Color(0xFF05283c)),

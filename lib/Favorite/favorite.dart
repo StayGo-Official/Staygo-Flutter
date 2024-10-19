@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, prefer_final_fields, unused_field
+
 import 'package:flutter/material.dart';
 import 'package:staygo/kost/detailkost.dart';
 import 'package:staygo/ojek/detailojek.dart';
@@ -12,7 +14,7 @@ class FavoritePage extends StatefulWidget {
 class _FavoritePageState extends State<FavoritePage> {
   int _currentIndex = 0;
 
-  String selectedOption = 'Ride';
+  String selectedOption = 'Ojek';
 
   final List<Map<String, String>> items = [
     {'name': 'Irvan', 'gender': 'Cowok', 'image': 'assets/kos2.png'},

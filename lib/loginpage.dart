@@ -1,10 +1,13 @@
-// ignore_for_file: unused_import
+// ignore_for_file: unused_import, prefer_const_constructors, prefer_const_literals_to_create_immutables, use_super_parameters
 
 import 'package:flutter/material.dart';
 import 'package:staygo/Beranda/beranda.dart';
 import 'package:staygo/navigationBottom.dart';
 import 'package:staygo/registerPage.dart';
 import 'lupapassword.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+final Uri _LoginGoogleUrl = Uri.parse('https://accounts.google.com/v3/signin/identifier?authuser=0&continue=https%3A%2F%2Fmyaccount.google.com%2F%3Futm_source%3Dsign_in_no_continue%26pli%3D1&ec=GAlAwAE&hl=in&service=accountsettings&flowName=GlifWebSignIn&flowEntry=AddSession&dsh=S537678445%3A1729317055575994&ddm=0');
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -16,6 +19,12 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   // Variabel untuk menyembunyikan atau menampilkan password
   bool _isObscure = true;
+
+  Future<void> _launchGoogleLogin() async {
+    if (!await launchUrl(_LoginGoogleUrl)) {
+      throw Exception('Could not launch $_LoginGoogleUrl');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -222,9 +231,7 @@ class _LoginPageState extends State<LoginPage> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 25.0),
                   child: GestureDetector(
-                    onTap: () {
-                      // Tambahkan fungsi login Google di sini
-                    },
+                    onTap: _launchGoogleLogin,
                     child: Container(
                       padding: EdgeInsets.all(15),
                       decoration: BoxDecoration(
