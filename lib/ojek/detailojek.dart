@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 final Uri _whatsappUrl = Uri.parse(
-    'https://api.whatsapp.com/send?phone=6285358868477&text=Halo%20saya%20mau%20pesan%20Ojek');
+    'https://api.whatsapp.com/send?phone=6281264384767&text=Halo%20saya%20mau%20pesan%20Ojek');
 
 class Detailojek extends StatefulWidget {
   const Detailojek({super.key});
@@ -62,11 +62,11 @@ class _DetailojekState extends State<Detailojek> {
                 },
                 children: [
                   Image.asset(
-                    'assets/detailkos1.png',
+                    'assets/bgboy.png',
                     fit: BoxFit.cover,
                   ),
                   Image.asset(
-                    'assets/kos2.png',
+                    'assets/bgboy2.png',
                     fit: BoxFit.cover,
                   ),
                 ],
@@ -110,7 +110,7 @@ class _DetailojekState extends State<Detailojek> {
                 children: [
                   // Kost Title
                   Text(
-                    'Ojek Irvan',
+                    'Ojek Bg Boy',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -126,7 +126,7 @@ class _DetailojekState extends State<Detailojek> {
                       SizedBox(width: 5),
                       Expanded(
                         child: Text(
-                          'Jl. Bukit Indah, Muara Satu, Lhokseumawe',
+                          'Jl. PNKA, Blang pulo, Muara Satu, Lhokseumawe',
                           style: TextStyle(fontSize: 14),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -178,7 +178,7 @@ class _DetailojekState extends State<Detailojek> {
                   SizedBox(height: 10),
 
                   Text(
-                    'Nama Lengkap: Irvan Nasyakban',
+                    'Nama Lengkap: Abi Sehat Gea',
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.black54,

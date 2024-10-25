@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:staygo/ojek/detailojek.dart';
+import 'package:staygo/ojek/detailojekbosmuda.dart';
+import 'package:staygo/ojek/detailojekgirlkuy.dart';
+import 'package:staygo/ojek/detailojeknurul.dart';
+import 'package:staygo/ojek/detailojekrafli.dart';
 
 class Ojekhomepage extends StatefulWidget {
   const Ojekhomepage({super.key});
@@ -11,11 +15,37 @@ class Ojekhomepage extends StatefulWidget {
 class _OjekhomepageState extends State<Ojekhomepage> {
   String selectedOption = 'Ride'; // Default selected option
 
-  final List<Map<String, String>> items = [
-    {'name': 'Irvan', 'gender': 'Cowok', 'image': 'assets/kos2.png'},
-    {'name': 'Taufik', 'gender': 'Cowok', 'image': 'assets/kos2.png'},
-    {'name': 'Widya', 'gender': 'Cewok', 'image': 'assets/kos2.png'},
-    {'name': 'Ahnad', 'gender': 'Cowok', 'image': 'assets/kos2.png'},
+  final List<Map<String, dynamic>> items = [
+    {
+      'name': 'Bg Boy',
+      'gender': 'Cowok',
+      'image': 'assets/bgboy.png',
+      'detailPage': Detailojek(),
+    },
+    {
+      'name': 'Rafli',  
+      'gender': 'Cowok',
+      'image': 'assets/rafli.png',
+      'detailPage': Detailojekrafli(),
+    },
+    {
+      'name': 'Nurul',  
+      'gender': 'Cewek',
+      'image': 'assets/nurul.png',
+      'detailPage': Detailojeknurul(),
+    },
+    {
+      'name': 'Girls Kuy',  
+      'gender': 'Cewek',
+      'image': 'assets/icha.png',
+      'detailPage': Detailojekgirlkuy(),
+    },
+    {
+      'name': 'Bos Muda',  
+      'gender': 'Cowok',
+      'image': 'assets/wahyudi.png',
+      'detailPage': Detailojekbosmuda(),
+    }
   ];
 
   @override
@@ -256,9 +286,8 @@ class _OjekhomepageState extends State<Ojekhomepage> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) {
-                                      return Detailojek();
-                                    },
+                                    builder: (context) =>
+                                        items[index]['detailPage'],
                                   ),
                                 );
                               },

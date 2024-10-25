@@ -38,6 +38,16 @@ dependencies:
   animated_splash_screen: ^1.3.0
   url_launcher: ^6.3.0
   image_picker: ^0.8.4+4
+  flutter_launcher_icons: ^0.14.1
+
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/ic_launcher.png"
+  min_sdk_android: 21
+  adaptive_icon_background: "#ffffff"
+  adaptive_icon_foreground: "assets/ic_launcher.png"
 
 dev_dependencies:
   flutter_test:
@@ -87,6 +97,22 @@ flutter:
     - assets/kost-icon.png
     - assets/gambar-ganti-password.png
     - assets/gambar-ganti-password.jpg
+    - assets/ic_launcher.png
+    - assets/wifi-icon.png
+    - assets/dapur-icon.png
+    - assets/kamar-icon.png
+    - assets/bgboy.png
+    - assets/bgboy2.png
+    - assets/rafli.png
+    - assets/rafli2.png
+    - assets/nurul.png
+    - assets/icha.png
+    - assets/icha2.png
+    - assets/wahyudi.png
+    - assets/wahyudi2.png
+    - assets/kamar-mukhsin.png
+    - assets/kamar-mukhsin2.png
+    - assets/kamar-muchtar.png
     
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

@@ -3,6 +3,9 @@
 import 'package:flutter/material.dart';
 import 'package:staygo/Favorite/favorite.dart';
 import 'package:staygo/kost/detailkost.dart';
+import 'package:staygo/kost/detailkostgajah.dart';
+import 'package:staygo/kost/detailkostmuchtar.dart';
+import 'package:staygo/kost/detailkostnafisagreen.dart';
 
 class kostHomepage extends StatefulWidget {
   const kostHomepage({super.key});
@@ -12,6 +15,44 @@ class kostHomepage extends StatefulWidget {
 }
 
 class _kostHomepageState extends State<kostHomepage> {
+  final List<Map<String, dynamic>> kostList = [
+    {
+      'image': 'assets/kos2.png',
+      'title': 'Kost Nyaman di Tengah Kota',
+      'location': 'Bukit Indah',
+      'rating': '4,8/5 (reviewers)',
+      'price': 'Rp 6.500.000 /tahun',
+      'ratingColor': Colors.orange,
+      'detailPage': DetailKost(),
+    },
+    {
+      'image': 'assets/kos3.png',
+      'title': 'Kost Murah dan Bersih',
+      'location': 'Jl. Mawar',
+      'rating': '4,5/5 (reviewers)',
+      'price': 'Rp 5.000.000 /tahun',
+      'ratingColor': Colors.orange,
+      'detailPage': DetailKostNafisaGreen(),
+    },
+    {
+      'image': 'assets/kos3.png',
+      'title': 'Kost Pak Muchtar',
+      'location': 'Jl. Mawar',
+      'rating': '4,5/5 (reviewers)',
+      'price': 'Rp 5.000.000 /tahun',
+      'ratingColor': Colors.orange,
+      'detailPage': DetailKostMuchtar(),
+    },
+    {
+      'image': 'assets/kos3.png',
+      'title': 'Kost Gajah',
+      'location': 'Jl. Bukit Indah',
+      'rating': '4,5/5 (reviewers)',
+      'price': 'Rp 7.500.000 /tahun',
+      'ratingColor': Colors.orange,
+      'detailPage': DetailKostGajah(),
+    }
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -73,13 +114,13 @@ class _kostHomepageState extends State<kostHomepage> {
                   IconButton(
                     onPressed: () {
                       Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) {
-                              return FavoritePage();
-                            },
-                          ),
-                        );
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) {
+                            return FavoritePage();
+                          },
+                        ),
+                      );
                     },
                     icon:
                         Icon(Icons.favorite_outline, color: Color(0xFF05283c)),
@@ -263,34 +304,45 @@ class _kostHomepageState extends State<kostHomepage> {
               height: 280, // Height of the carousel
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
-                itemCount:
-                    3, // Set count to 3 to show three different recommendations
+                itemCount: kostList.length, // Set count to 3 to show three different recommendations
                 itemBuilder: (context, index) {
                   // Defining data for each item
-                  final kostList = [
-                    {
-                      'image': 'assets/kos1.png',
-                      'title': 'Kost dekat dengan Universitas',
-                      'location': 'Blang Pulo',
-                      'rating': '4,2/5 (reviewers)',
-                      'price': 'Rp 8.000.000 /tahun',
-                      'ratingColor': Colors.orange,
-                    },
+                  final List<Map<String, dynamic>> kostList = [
                     {
                       'image': 'assets/kos2.png',
-                      'title': 'Kost Nyaman di Tengah Kota',
+                      'title': 'Kost Pak Mukhsin',
                       'location': 'Bukit Indah',
                       'rating': '4,8/5 (reviewers)',
-                      'price': 'Rp 6.500.000 /tahun',
+                      'price': 'Rp 6.000.000 /tahun',
                       'ratingColor': Colors.orange,
+                      'detailPage': DetailKost(),
                     },
                     {
                       'image': 'assets/kos3.png',
-                      'title': 'Kost Murah dan Bersih',
-                      'location': 'Jl. Mawar',
+                      'title': 'Kost Nafisah Green',
+                      'location': 'Jl. PNKA',
                       'rating': '4,5/5 (reviewers)',
-                      'price': 'Rp 5.000.000 /tahun',
+                      'price': 'Rp 5.500.000 /tahun',
                       'ratingColor': Colors.orange,
+                      'detailPage': DetailKostNafisaGreen(),
+                    },
+                    {
+                      'image': 'assets/kos3.png',
+                      'title': 'Kost Pak Muchtar',
+                      'location': 'Blang Pulo',
+                      'rating': '4,5/5 (reviewers)',
+                      'price': 'Rp 4.500.000 /tahun',
+                      'ratingColor': Colors.orange,
+                      'detailPage': DetailKostMuchtar(),
+                    },
+                    {
+                      'image': 'assets/kos3.png',
+                      'title': 'Kost Gajah',
+                      'location': 'Bukit Indah',
+                      'rating': '4,5/5 (reviewers)',
+                      'price': 'Rp 7.500.000 /tahun',
+                      'ratingColor': Colors.orange,
+                      'detailPage': DetailKostGajah(),
                     },
                   ];
 
@@ -300,13 +352,11 @@ class _kostHomepageState extends State<kostHomepage> {
                   return GestureDetector(
                     onTap: () {
                       Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) {
-                              return DetailKost();
-                            },
-                          ),
-                        );
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => kost['detailPage'],
+                        ),
+                      );
                     },
                     child: Container(
                       width: 160,

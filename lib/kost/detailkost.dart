@@ -3,8 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-final Uri _url = Uri.parse('https://www.google.com/maps?q=5.206778,97.072333');
-final Uri _whatsappUrl = Uri.parse('https://api.whatsapp.com/send?phone=6285358868477&text=Halo%20saya%20mau%20bertanya%20tentang%20Kamar%20Kost%20nya');
+final Uri _url = Uri.parse('https://www.google.com/maps?q=5.207718763786751, 97.06988898083029');
+final Uri _whatsappUrl = Uri.parse('https://api.whatsapp.com/send?phone=6281360903248&text=Halo%20saya%20mau%20bertanya%20tentang%20Kamar%20Kost%20nya');
 
 class DetailKost extends StatefulWidget {
   const DetailKost({super.key});
@@ -71,11 +71,11 @@ class _DetailKostState extends State<DetailKost> {
                 },
                 children: [
                   Image.asset(
-                    'assets/detailkos1.png',
+                    'assets/kamar-mukhsin.png',
                     fit: BoxFit.cover,
                   ),
                   Image.asset(
-                    'assets/kos2.png',
+                    'assets/kamar-mukhsin2.png',
                     fit: BoxFit.cover,
                   ),
                 ],
@@ -135,7 +135,7 @@ class _DetailKostState extends State<DetailKost> {
                       SizedBox(width: 5),
                       Expanded(
                         child: Text(
-                          'Jl. Bukit Indah, Muara Satu, Lhokseumawe',
+                          'Jl.Bukit Indah, muara satu, lhokseumawe ',
                           style: TextStyle(fontSize: 14),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -149,7 +149,7 @@ class _DetailKostState extends State<DetailKost> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Rp 10.000.000',
+                        'Rp 6.000.000',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -186,7 +186,7 @@ class _DetailKostState extends State<DetailKost> {
                       Icon(Icons.check_circle, size: 20, color: Colors.green),
                       SizedBox(width: 5),
                       Text(
-                        '2 Tersedia',
+                        '4 Kamar Tersedia',
                         style: TextStyle(fontSize: 14),
                       ),
                     ],
@@ -223,11 +223,8 @@ class _DetailKostState extends State<DetailKost> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      _buildCategoryButton('assets/icon-tv.png', 'TV'),
-                      _buildCategoryButton('assets/icon-lemari.png', 'Lemari'),
-                      _buildCategoryButton(
-                          'assets/icon-tempat-tidur.png', 'Tempat Tidur'),
-                      _buildCategoryButton('assets/icon-ac.png', 'AC'),
+                      _buildCategoryButton('assets/wifi-icon.png', 'Wifi'),
+                      _buildCategoryButton('assets/dapur-icon.png', 'Dapur'),
                     ],
                   ),
 
@@ -278,7 +275,7 @@ class _DetailKostState extends State<DetailKost> {
                   SizedBox(height: 10),
 
                   Text(
-                    'Luas Kamar 6x4m lengkap dengan kamar mandi di dalam, terdapat halaman, area parkir yang luas, lingkungan yang nyaman dan CCTV 24 jam.',
+                    'Luas kamar 3 x 4 meter, kamar mandi luar, terdapat lahan jemuran luas, area parkir, lingkungan nyaman dan ccvt 24 jam',
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.black54,

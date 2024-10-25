@@ -9,8 +9,8 @@ class Registerpage extends StatefulWidget {
 }
 
 class _RegisterpageState extends State<Registerpage> {
-  bool _isObscure = true;
 
+  bool _isObscure = true;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
