@@ -35,7 +35,7 @@ class _kostHomepageState extends State<kostHomepage> {
       'detailPage': DetailKostNafisaGreen(),
     },
     {
-      'image': 'assets/kos3.png',
+      'image': 'assets/kost-gambar2.jpg',
       'title': 'Kost Pak Muchtar',
       'location': 'Jl. Mawar',
       'rating': '4,5/5 (reviewers)',

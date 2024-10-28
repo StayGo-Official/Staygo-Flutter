@@ -71,11 +71,11 @@ class _DetailKostNafisaGreenState extends State<DetailKostNafisaGreen> {
                 },
                 children: [
                   Image.asset(
-                    'assets/detailkos1.png',
+                    'assets/kost-green1.jpg',
                     fit: BoxFit.cover,
                   ),
                   Image.asset(
-                    'assets/kos2.png',
+                    'assets/kost-green2.jpg',
                     fit: BoxFit.cover,
                   ),
                 ],

@@ -45,7 +45,7 @@ flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
   image_path: "assets/ic_launcher.png"
-  min_sdk_android: 16
+  min_sdk_android: 19
   adaptive_icon_background: "#ffffff"
   adaptive_icon_foreground: "assets/ic_launcher.png"
 
@@ -113,6 +113,12 @@ flutter:
     - assets/kamar-mukhsin.png
     - assets/kamar-mukhsin2.png
     - assets/kamar-muchtar.png
+    - assets/kost-gajah1.jpg
+    - assets/kost-gajah2.jpg
+    - assets/kost-muchtar1.jpg
+    - assets/kost-muchtar2.jpg
+    - assets/kost-green1.jpg
+    - assets/kost-green2.jpg
     
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

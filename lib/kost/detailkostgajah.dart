@@ -71,7 +71,7 @@ class _DetailKostGajahState extends State<DetailKostGajah> {
                 },
                 children: [
                   Image.asset(
-                    'assets/detailkos1.png',
+                    'assets/kost-gajah1.jpg',
                     fit: BoxFit.cover,
                   ),
                   Image.asset(

@@ -71,11 +71,11 @@ class _DetailKostMuchtarState extends State<DetailKostMuchtar> {
                 },
                 children: [
                   Image.asset(
-                    'assets/kamar-muchtar.png',
+                    'assets/kost-muchtar2.jpg',
                     fit: BoxFit.cover,
                   ),
                   Image.asset(
-                    'assets/kos2.png',
+                    'assets/kost-muchtar1.jpg',
                     fit: BoxFit.cover,
                   ),
                 ],
