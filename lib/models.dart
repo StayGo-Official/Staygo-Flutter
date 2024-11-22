@@ -1,0 +1,90 @@
+class Kost {
+  String namaKost;
+  String alamat;
+  int hargaPerbulan;
+  int hargaPertahun;
+  int tersedia;
+  String gender;
+  List<String> fasilitas;
+  String deskripsi;
+  double latitude;
+  double longitude;
+  List<String> images;
+  List<String> url;
+  String createdAt;
+  String updatedAt;
+  int id;
+
+  Kost ({
+    required this.namaKost,
+    required this.alamat,
+    required this.hargaPerbulan,
+    required this.hargaPertahun,
+    required this.tersedia,
+    required this.gender,
+    required this.fasilitas,
+    required this.deskripsi,
+    required this.latitude,
+    required this.longitude,
+    required this.images,
+    required this.url,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.id,
+  });
+
+  factory Kost.fromJson(Map<String, dynamic> json) {
+    return Kost(
+      namaKost: json['namaKost'],
+      alamat: json['alamat'],
+      hargaPerbulan: json['hargaPerbulan'],
+      hargaPertahun: json['hargaPertahun'],
+      tersedia: json['tersedia'],
+      gender: json['gender'],
+      fasilitas: List<String>.from(json['fasilitas']),
+      deskripsi: json['deskripsi'],
+      latitude: (json['latitude'] as num).toDouble(), // Konversi ke double
+      longitude: (json['longitude'] as num).toDouble(), // Konversi ke double
+      images: List<String>.from(json['images']),
+      url: List<String>.from(json['url']),
+      createdAt: json['createdAt'],
+      updatedAt: json['updatedAt'],
+      id: json['id'],
+    );
+  }
+}
+
+class Ojek {
+  String nama;
+  String alamat;
+  bool status;
+  String gender;
+  List<String> images;
+  List<String> url;
+  String createdAt;
+  int id;
+
+  Ojek({
+    required this.nama,
+    required this.alamat,
+    required this.status,
+    required this.gender,
+    required this.images,
+    required this.url,
+    required this.createdAt,
+    required this.id,
+  });
+
+  factory Ojek.fromJson(Map<String, dynamic> json) {
+    return Ojek(
+      nama: json['nama'],
+      alamat: json['alamat'],
+      status: json['status'],
+      gender: json['gender'],
+      images: List<String>.from(json['images']),
+      url: List<String>.from(json['url']),
+      createdAt: json['createdAt'],
+      id: json['id'],
+    );
+  }
+}

@@ -2,9 +2,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:staygo/constants.dart';
 
-final Uri _url = Uri.parse('https://www.google.com/maps?q=5.207718763786751, 97.06988898083029');
-final Uri _whatsappUrl = Uri.parse('https://api.whatsapp.com/send?phone=6281360903248&text=Halo%20saya%20mau%20bertanya%20tentang%20Kamar%20Kost%20nya');
+final Uri _whatsappUrl = Uri.parse(
+    'https://api.whatsapp.com/send?phone=6281360903248&text=Halo%20saya%20mau%20bertanya%20tentang%20Kamar%20Kost%20nya');
 
 class DetailKost extends StatefulWidget {
   const DetailKost({super.key});
@@ -17,9 +18,11 @@ class _DetailKostState extends State<DetailKost> {
   int _currentIndex =
       0; // For tracking the index of the current page in the PageView
 
-  Future<void> _launchUrl() async {
-    if (!await launchUrl(_url)) {
-      throw Exception('Could not launch $_url');
+  Future<void> _launchGoogleMaps(double latitude, double longitude) async {
+    final Uri url =
+        Uri.parse('https://www.google.com/maps?q=$latitude,$longitude');
+    if (!await launchUrl(url)) {
+      throw Exception('Could not launch $url');
     }
   }
 
@@ -30,7 +33,20 @@ class _DetailKostState extends State<DetailKost> {
   }
 
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final Map<String, dynamic> kostData =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
+
+    List<String> imageUrls = kostData['images']
+        .map<String>((image) =>
+            AppConstants.baseUrlImage + image) // Gabungkan dengan baseUrlImage
+        .toList();
+
     return Scaffold(
       backgroundColor: Colors.white,
       extendBodyBehindAppBar:
@@ -69,16 +85,12 @@ class _DetailKostState extends State<DetailKost> {
                     _currentIndex = index;
                   });
                 },
-                children: [
-                  Image.asset(
-                    'assets/kamar-mukhsin.png',
+                children: imageUrls.map((imageUrl) {
+                  return Image.network(
+                    imageUrl,
                     fit: BoxFit.cover,
-                  ),
-                  Image.asset(
-                    'assets/kamar-mukhsin2.png',
-                    fit: BoxFit.cover,
-                  ),
-                ],
+                  );
+                }).toList(),
               ),
             ),
 
@@ -99,11 +111,13 @@ class _DetailKostState extends State<DetailKost> {
             SizedBox(height: 10),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                buildIndicator(0 == _currentIndex),
-                SizedBox(width: 5),
-                buildIndicator(1 == _currentIndex),
-              ],
+              children: List.generate(kostData['images'].length, (index) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                  child: buildIndicator(
+                      index == _currentIndex), // Check if this index is active
+                );
+              }),
             ),
 
             // Kost Detail Information Section Full Screen Width
@@ -119,7 +133,7 @@ class _DetailKostState extends State<DetailKost> {
                 children: [
                   // Kost Title
                   Text(
-                    'Kost Pak Mukhsin, Jl. Bukit Indah',
+                    kostData['namaKost'],
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -135,7 +149,7 @@ class _DetailKostState extends State<DetailKost> {
                       SizedBox(width: 5),
                       Expanded(
                         child: Text(
-                          'Jl.Bukit Indah, muara satu, lhokseumawe ',
+                          kostData['alamat'],
                           style: TextStyle(fontSize: 14),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -149,7 +163,31 @@ class _DetailKostState extends State<DetailKost> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Rp 6.000.000',
+                        'Rp. ' + kostData['hargaPerbulan'].toString(),
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                      Text(
+                        '/Perbulan',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  SizedBox(height: 10),
+
+                  // Price Row
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Rp. ' + kostData['hargaPertahun'].toString(),
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -165,19 +203,7 @@ class _DetailKostState extends State<DetailKost> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 10),
 
-                  // Rating Row
-                  Row(
-                    children: [
-                      Icon(Icons.star, size: 20, color: Colors.orange),
-                      SizedBox(width: 5),
-                      Text(
-                        '4,5/5 (100 reviewers)',
-                        style: TextStyle(fontSize: 14),
-                      ),
-                    ],
-                  ),
                   SizedBox(height: 10),
 
                   // Availability Row
@@ -186,7 +212,7 @@ class _DetailKostState extends State<DetailKost> {
                       Icon(Icons.check_circle, size: 20, color: Colors.green),
                       SizedBox(width: 5),
                       Text(
-                        '4 Kamar Tersedia',
+                        kostData['tersedia'].toString() + ' Kamar Tersedia',
                         style: TextStyle(fontSize: 14),
                       ),
                     ],
@@ -195,7 +221,7 @@ class _DetailKostState extends State<DetailKost> {
 
                   // Type of Kost
                   Text(
-                    'Kost Khusus Wanita',
+                    'Kost Khusus ' + kostData['gender'],
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.black,
@@ -222,10 +248,35 @@ class _DetailKostState extends State<DetailKost> {
                   // Buttons
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _buildCategoryButton('assets/wifi-icon.png', 'Wifi'),
-                      _buildCategoryButton('assets/dapur-icon.png', 'Dapur'),
-                    ],
+                    children: kostData['fasilitas']?.map<Widget>((facility) {
+                          // Tentukan ikon berdasarkan nama fasilitas
+                          String iconPath;
+                          switch (facility.toLowerCase()) {
+                            case 'wifi':
+                              iconPath = 'assets/wifi-icon.png';
+                              break;
+                            case 'lemari':
+                              iconPath = 'assets/icon-lemari.png';
+                              break;
+                            case 'ac':
+                              iconPath = 'assets/icon-ac.png';
+                              break;
+                            case 'kasur':
+                            case 'tempat tidur':
+                              iconPath = 'assets/icon-tempat-tidur.png';
+                              break;
+                            case 'tv':
+                            case 'televisi':
+                              iconPath = 'assets/icon-tv.png';
+                              break;
+                            default:
+                              iconPath =
+                                  'assets/kamar-icon.png'; // Ikon default
+                          }
+
+                          return _buildCategoryButton(iconPath, facility);
+                        }).toList() ??
+                        [], // Jika null, tampilkan daftar kosong
                   ),
 
                   SizedBox(height: 10),
@@ -275,7 +326,7 @@ class _DetailKostState extends State<DetailKost> {
                   SizedBox(height: 10),
 
                   Text(
-                    'Luas kamar 3 x 4 meter, kamar mandi luar, terdapat lahan jemuran luas, area parkir, lingkungan nyaman dan ccvt 24 jam',
+                    kostData['deskripsi'],
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.black54,
@@ -299,7 +350,7 @@ class _DetailKostState extends State<DetailKost> {
                   SizedBox(height: 10),
 
                   Text(
-                    'Jl.Bukit Indah, Kec. Muara Satu',
+                    kostData['alamat'],
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.black54,
@@ -308,7 +359,22 @@ class _DetailKostState extends State<DetailKost> {
 
                   Center(
                     child: TextButton(
-                      onPressed: _launchUrl,
+                      onPressed: () {
+                        final latitude = kostData['latitude'];
+                        final longitude = kostData['longitude'];
+
+                        // Pastikan latitude dan longitude tersedia
+                        if (latitude != null && longitude != null) {
+                          _launchGoogleMaps(latitude, longitude);
+                        } else {
+                          // Tampilkan pesan kesalahan jika data tidak tersedia
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Lokasi tidak tersedia'),
+                            ),
+                          );
+                        }
+                      },
                       child: Text(
                         'Buka Google Maps',
                         style: TextStyle(

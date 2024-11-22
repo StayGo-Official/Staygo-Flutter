@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:staygo/constants.dart';
 
 final Uri _whatsappUrl = Uri.parse(
     'https://api.whatsapp.com/send?phone=6281264384767&text=Halo%20saya%20mau%20pesan%20Ojek');
@@ -21,7 +22,20 @@ class _DetailojekState extends State<Detailojek> {
   }
 
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final Map<String, dynamic> ojekData =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
+
+    List<String> imageUrls = ojekData['images']
+        .map<String>((image) =>
+            AppConstants.baseUrlImage + image) // Gabungkan dengan baseUrlImage
+        .toList();
+
     return Scaffold(
       backgroundColor: Colors.white,
       extendBodyBehindAppBar:
@@ -60,16 +74,12 @@ class _DetailojekState extends State<Detailojek> {
                     _currentIndex = index;
                   });
                 },
-                children: [
-                  Image.asset(
-                    'assets/bgboy.png',
+                children: imageUrls.map((imageUrl) {
+                  return Image.network(
+                    imageUrl,
                     fit: BoxFit.cover,
-                  ),
-                  Image.asset(
-                    'assets/bgboy2.png',
-                    fit: BoxFit.cover,
-                  ),
-                ],
+                  );
+                }).toList(),
               ),
             ),
 
@@ -90,11 +100,13 @@ class _DetailojekState extends State<Detailojek> {
             SizedBox(height: 10),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                buildIndicator(0 == _currentIndex),
-                SizedBox(width: 5),
-                buildIndicator(1 == _currentIndex),
-              ],
+              children: List.generate(ojekData['images'].length, (index) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                  child: buildIndicator(
+                      index == _currentIndex), // Check if this index is active
+                );
+              }),
             ),
 
             // Kost Detail Information Section Full Screen Width
@@ -110,7 +122,7 @@ class _DetailojekState extends State<Detailojek> {
                 children: [
                   // Kost Title
                   Text(
-                    'Ojek Bg Boy',
+                    ojekData['nama'],
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -126,7 +138,7 @@ class _DetailojekState extends State<Detailojek> {
                       SizedBox(width: 5),
                       Expanded(
                         child: Text(
-                          'Jl. PNKA, Blang pulo, Muara Satu, Lhokseumawe',
+                          ojekData['alamat'],
                           style: TextStyle(fontSize: 14),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -137,16 +149,16 @@ class _DetailojekState extends State<Detailojek> {
                   SizedBox(height: 10),
 
                   // Rating Row
-                  Row(
-                    children: [
-                      Icon(Icons.star, size: 20, color: Colors.orange),
-                      SizedBox(width: 5),
-                      Text(
-                        '4,5/5 (100 reviewers)',
-                        style: TextStyle(fontSize: 14),
-                      ),
-                    ],
-                  ),
+                  // Row(
+                  //   children: [
+                  //     Icon(Icons.star, size: 20, color: Colors.orange),
+                  //     SizedBox(width: 5),
+                  //     Text(
+                  //       '4,5/5 (100 reviewers)',
+                  //       style: TextStyle(fontSize: 14),
+                  //     ),
+                  //   ],
+                  // ),
                   SizedBox(height: 10),
 
                   // Availability Row
@@ -155,7 +167,7 @@ class _DetailojekState extends State<Detailojek> {
                       Icon(Icons.check_circle, size: 20, color: Colors.green),
                       SizedBox(width: 5),
                       Text(
-                        'Tersedia',
+                        ojekData['status'] ? 'Tersedia' : 'Tidak Tersedia',
                         style: TextStyle(fontSize: 14),
                       ),
                     ],
@@ -178,7 +190,7 @@ class _DetailojekState extends State<Detailojek> {
                   SizedBox(height: 10),
 
                   Text(
-                    'Nama Lengkap: Abi Sehat Gea',
+                    'Nama Lengkap: ' + ojekData['nama'],
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.black54,
@@ -186,7 +198,7 @@ class _DetailojekState extends State<Detailojek> {
                   ),
 
                   Text(
-                    'Jenis Kelamin: Laki-Laki',
+                    'Jenis Kelamin: ' + ojekData['gender'],
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.black54,

@@ -2,10 +2,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:staygo/Favorite/favorite.dart';
-import 'package:staygo/kost/detailkost.dart';
-import 'package:staygo/kost/detailkostgajah.dart';
-import 'package:staygo/kost/detailkostmuchtar.dart';
-import 'package:staygo/kost/detailkostnafisagreen.dart';
+import 'package:staygo/constants.dart';
+import 'package:staygo/models.dart';
+import 'package:staygo/repository.dart';
 
 class kostHomepage extends StatefulWidget {
   const kostHomepage({super.key});
@@ -15,44 +14,13 @@ class kostHomepage extends StatefulWidget {
 }
 
 class _kostHomepageState extends State<kostHomepage> {
-  final List<Map<String, dynamic>> kostList = [
-    {
-      'image': 'assets/kos2.png',
-      'title': 'Kost Nyaman di Tengah Kota',
-      'location': 'Bukit Indah',
-      'rating': '4,8/5 (reviewers)',
-      'price': 'Rp 6.500.000 /tahun',
-      'ratingColor': Colors.orange,
-      'detailPage': DetailKost(),
-    },
-    {
-      'image': 'assets/kos3.png',
-      'title': 'Kost Murah dan Bersih',
-      'location': 'Jl. Mawar',
-      'rating': '4,5/5 (reviewers)',
-      'price': 'Rp 5.000.000 /tahun',
-      'ratingColor': Colors.orange,
-      'detailPage': DetailKostNafisaGreen(),
-    },
-    {
-      'image': 'assets/kost-gambar2.jpg',
-      'title': 'Kost Pak Muchtar',
-      'location': 'Jl. Mawar',
-      'rating': '4,5/5 (reviewers)',
-      'price': 'Rp 5.000.000 /tahun',
-      'ratingColor': Colors.orange,
-      'detailPage': DetailKostMuchtar(),
-    },
-    {
-      'image': 'assets/kos3.png',
-      'title': 'Kost Gajah',
-      'location': 'Jl. Bukit Indah',
-      'rating': '4,5/5 (reviewers)',
-      'price': 'Rp 7.500.000 /tahun',
-      'ratingColor': Colors.orange,
-      'detailPage': DetailKostGajah(),
-    }
-  ];
+  late Future<List<Kost>> kostList;
+
+  @override
+  void initState() {
+    super.initState();
+    kostList = RepositoryKost().getDataKost();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -302,150 +270,122 @@ class _kostHomepageState extends State<kostHomepage> {
             // Horizontal Carousel for Recommended Kost
             Container(
               height: 280, // Height of the carousel
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: kostList.length, // Set count to 3 to show three different recommendations
-                itemBuilder: (context, index) {
-                  // Defining data for each item
-                  final List<Map<String, dynamic>> kostList = [
-                    {
-                      'image': 'assets/kos2.png',
-                      'title': 'Kost Pak Mukhsin',
-                      'location': 'Bukit Indah',
-                      'rating': '4,8/5 (reviewers)',
-                      'price': 'Rp 6.000.000 /tahun',
-                      'ratingColor': Colors.orange,
-                      'detailPage': DetailKost(),
-                    },
-                    {
-                      'image': 'assets/kos3.png',
-                      'title': 'Kost Nafisah Green',
-                      'location': 'Jl. PNKA',
-                      'rating': '4,5/5 (reviewers)',
-                      'price': 'Rp 5.500.000 /tahun',
-                      'ratingColor': Colors.orange,
-                      'detailPage': DetailKostNafisaGreen(),
-                    },
-                    {
-                      'image': 'assets/kos3.png',
-                      'title': 'Kost Pak Muchtar',
-                      'location': 'Blang Pulo',
-                      'rating': '4,5/5 (reviewers)',
-                      'price': 'Rp 4.500.000 /tahun',
-                      'ratingColor': Colors.orange,
-                      'detailPage': DetailKostMuchtar(),
-                    },
-                    {
-                      'image': 'assets/kos3.png',
-                      'title': 'Kost Gajah',
-                      'location': 'Bukit Indah',
-                      'rating': '4,5/5 (reviewers)',
-                      'price': 'Rp 7.500.000 /tahun',
-                      'ratingColor': Colors.orange,
-                      'detailPage': DetailKostGajah(),
-                    },
-                  ];
+              child: FutureBuilder<List<Kost>>(
+                future: kostList,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return Center(child: Text('Tidak ada data kost'));
+                  }
 
-                  // Get the data for the current item
-                  final kost = kostList[index];
+                  final kostListData = snapshot.data!;
 
-                  return GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => kost['detailPage'],
+                  return ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: kostListData.length,
+                    itemBuilder: (context, index) {
+                      final Kost kost = kostListData[index];
+
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.of(context).popAndPushNamed(
+                            '/detail-kost',
+                            arguments: {
+                              'namaKost': kost.namaKost,
+                              'hargaPerbulan': kost.hargaPerbulan,
+                              'hargaPertahun': kost.hargaPertahun,
+                              'tersedia': kost.tersedia,
+                              'gender': kost.gender,
+                              'fasilitas': kost.fasilitas,
+                              'deskripsi': kost.deskripsi,
+                              'alamat': kost.alamat,
+                              'latitude': kost.latitude,
+                              'longitude': kost.longitude,
+                              'images': kost.images,
+                            },
+                          );
+                        },
+                        child: Container(
+                          width: 160,
+                          margin: EdgeInsets.all(10), // Margin between items
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(15),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.3),
+                                spreadRadius: 3,
+                                blurRadius: 7,
+                                offset: Offset(0, 3), // Shadow position
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Kost Image
+                              ClipRRect(
+                                borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(15),
+                                  topRight: Radius.circular(15),
+                                ),
+                                child: Image.network(
+                                  AppConstants.baseUrlImage +
+                                      kost.images.first, // Cast to String
+                                  width: 160,
+                                  height: 150,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(10.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      kost.namaKost as String, // Cast to String
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    SizedBox(height: 5),
+                                    Row(
+                                      children: [
+                                        Icon(Icons.location_on_outlined,
+                                            size: 16, color: Colors.blue),
+                                        SizedBox(width: 5),
+                                        Text(
+                                          kost.alamat
+                                              as String, // Cast to String
+                                          style: TextStyle(fontSize: 12),
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(height: 5),
+                                    Text(
+                                      "Rp. " +
+                                          kost.hargaPertahun.toString() +
+                                          " /tahun", // Cast to String
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.green,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       );
                     },
-                    child: Container(
-                      width: 160,
-                      margin: EdgeInsets.all(10), // Margin between items
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(15),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.3),
-                            spreadRadius: 3,
-                            blurRadius: 7,
-                            offset: Offset(0, 3), // Shadow position
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Kost Image
-                          ClipRRect(
-                            borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(15),
-                              topRight: Radius.circular(15),
-                            ),
-                            child: Image.asset(
-                              kost['image'] as String, // Cast to String
-                              width: 160,
-                              height: 150,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(10.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  kost['title'] as String, // Cast to String
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                SizedBox(height: 5),
-                                Row(
-                                  children: [
-                                    Icon(Icons.location_on_outlined,
-                                        size: 16, color: Colors.blue),
-                                    SizedBox(width: 5),
-                                    Text(
-                                      kost['location']
-                                          as String, // Cast to String
-                                      style: TextStyle(fontSize: 12),
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 5),
-                                Row(
-                                  children: [
-                                    Icon(Icons.star,
-                                        size: 16,
-                                        color: kost['ratingColor']
-                                            as Color), // Cast to Color
-                                    SizedBox(width: 5),
-                                    Text(
-                                      kost['rating']
-                                          as String, // Cast to String
-                                      style: TextStyle(fontSize: 12),
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 5),
-                                Text(
-                                  kost['price'] as String, // Cast to String
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.green,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
                   );
                 },
               ),

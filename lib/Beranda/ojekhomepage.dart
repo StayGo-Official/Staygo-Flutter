@@ -1,9 +1,10 @@
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, unused_element
+
 import 'package:flutter/material.dart';
 import 'package:staygo/ojek/detailojek.dart';
-import 'package:staygo/ojek/detailojekbosmuda.dart';
-import 'package:staygo/ojek/detailojekgirlkuy.dart';
-import 'package:staygo/ojek/detailojeknurul.dart';
-import 'package:staygo/ojek/detailojekrafli.dart';
+import 'package:staygo/constants.dart';
+import 'package:staygo/models.dart';
+import 'package:staygo/repository.dart';
 
 class Ojekhomepage extends StatefulWidget {
   const Ojekhomepage({super.key});
@@ -15,38 +16,13 @@ class Ojekhomepage extends StatefulWidget {
 class _OjekhomepageState extends State<Ojekhomepage> {
   String selectedOption = 'Ride'; // Default selected option
 
-  final List<Map<String, dynamic>> items = [
-    {
-      'name': 'Bg Boy',
-      'gender': 'Cowok',
-      'image': 'assets/bgboy.png',
-      'detailPage': Detailojek(),
-    },
-    {
-      'name': 'Rafli',  
-      'gender': 'Cowok',
-      'image': 'assets/rafli.png',
-      'detailPage': Detailojekrafli(),
-    },
-    {
-      'name': 'Nurul',  
-      'gender': 'Cewek',
-      'image': 'assets/nurul.png',
-      'detailPage': Detailojeknurul(),
-    },
-    {
-      'name': 'Girls Kuy',  
-      'gender': 'Cewek',
-      'image': 'assets/icha.png',
-      'detailPage': Detailojekgirlkuy(),
-    },
-    {
-      'name': 'Bos Muda',  
-      'gender': 'Cowok',
-      'image': 'assets/wahyudi.png',
-      'detailPage': Detailojekbosmuda(),
-    }
-  ];
+  late Future<List<Ojek>> ojekList;
+
+  @override
+  void initState() {
+    super.initState();
+    ojekList = RepositoryOjek().getDataOjek();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -217,106 +193,127 @@ class _OjekhomepageState extends State<Ojekhomepage> {
             // Vertical Carousel using PageView
             SizedBox(
               height: 490, // Set height for the grid container
-              child: GridView.builder(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2, // Two cards per row
-                  childAspectRatio: 0.7,
-                ),
-                itemCount: items.length, // Number of items
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.all(15.0),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                            color: const Color.fromARGB(255, 109, 109, 109),
-                            width: 2), // Border color
-                        borderRadius:
-                            BorderRadius.circular(15), // Rounded corners
+              child: FutureBuilder<List<Ojek>>(
+                future: ojekList,
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+
+                    final ojekListData = snapshot.data!;
+
+                    return GridView.builder(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2, // Two cards per row
+                        childAspectRatio: 0.7,
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Stack(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(13),
-                                    topRight: Radius.circular(13),
-                                    bottomLeft: Radius.circular(13),
-                                    bottomRight: Radius.circular(13),
-                                  ), // Sesuaikan dengan radius yang diinginkan
-                                  child: Image.asset(
-                                    items[index]['image']!,
-                                    fit: BoxFit.cover,
-                                    height: 120,
-                                    width: double.infinity,
-                                  ),
-                                ),
-                              ],
+                      itemCount: ojekListData.length, // Number of items
+                      itemBuilder: (context, index) {
+                        final Ojek ojek = ojekListData[index];
+
+                        return Padding(
+                          padding: const EdgeInsets.all(15.0),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: const Color.fromARGB(255, 109, 109, 109),
+                                width: 2,
+                              ), // Border color
+                              borderRadius:
+                                  BorderRadius.circular(15), // Rounded corners
                             ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Flexible(
-                                  child: Text(
-                                    'Tersedia\n${items[index]['name']} (${items[index]['gender']})',
-                                    textAlign: TextAlign.left,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      color: Color(0xFF06283D),
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                                IconButton(
-                                  icon: Icon(Icons.favorite_border),
-                                  iconSize: 29.0,
-                                  onPressed: () {
-                                    // Action ketika icon favorite ditekan
-                                  },
-                                ),
-                              ],
-                            ),
-                            GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        items[index]['detailPage'],
-                                  ),
-                                );
-                              },
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Icon(
-                                    Icons.info_outline,
-                                    size: 25.0,
-                                    color: Color(
-                                        0xFF06283D), // Menyesuaikan warna icon jika diperlukan
+                                  Stack(
+                                    children: [
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.only(
+                                          topLeft: Radius.circular(13),
+                                          topRight: Radius.circular(13),
+                                          bottomLeft: Radius.circular(13),
+                                          bottomRight: Radius.circular(13),
+                                        ),
+                                        child: Image.network(
+                                          AppConstants.baseUrlImage +
+                                              ojek.images.first,
+                                          fit: BoxFit.cover,
+                                          height: 120,
+                                          width: double.infinity,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    'Pesan Sekarang...',
-                                    style: TextStyle(
-                                      color: Color(0xFF06283D),
-                                      fontSize: 12,
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Flexible(
+                                        child: Text(
+                                          '${ojek.status ? 'Tersedia' : 'Tidak Tersedia'}\n${ojek.nama} (${ojek.gender})',
+                                          textAlign: TextAlign.left,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            color: Color(0xFF06283D),
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                      IconButton(
+                                        icon: Icon(Icons.favorite_border),
+                                        iconSize: 29.0,
+                                        onPressed: () {
+                                          // Action ketika icon favorite ditekan
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                  GestureDetector(
+                                    onTap: () {
+                                      Navigator.of(context).popAndPushNamed(
+                                        '/detail-ojek',
+                                        arguments: {
+                                          'id': ojek.id,
+                                          'nama': ojek.nama,
+                                          'alamat': ojek.alamat,
+                                          'status': ojek.status,
+                                          'gender': ojek.gender,
+                                          'images': ojek.images,
+                                        },
+                                      );
+                                    },
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      children: [
+                                        Icon(
+                                          Icons.info_outline,
+                                          size: 25.0,
+                                          color: Color(0xFF06283D),
+                                        ),
+                                        SizedBox(width: 8),
+                                        Text(
+                                          'Pesan Sekarang...',
+                                          style: TextStyle(
+                                            color: Color(0xFF06283D),
+                                            fontSize: 12,
+                                          ),
+                                          textAlign: TextAlign.left,
+                                        ),
+                                      ],
                                     ),
-                                    textAlign: TextAlign.left,
                                   ),
                                 ],
                               ),
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  } else {
+                    return Center(child: CircularProgressIndicator());
+                  }
                 },
               ),
             ),

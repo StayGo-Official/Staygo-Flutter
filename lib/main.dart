@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:staygo/kost/detailkost.dart';
+import 'package:staygo/ojek/detailojek.dart';
 import 'package:staygo/splashscreen.dart';
 
 void main() {
@@ -18,7 +20,11 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: SplashScreen()
+      home: SplashScreen(),
+      routes: {
+          "/detail-kost": (context) => const DetailKost(),
+          "/detail-ojek": (context) => const Detailojek(),
+        },
     );
   }
 }
