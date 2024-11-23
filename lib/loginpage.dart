@@ -57,10 +57,22 @@ class _LoginPageState extends State<LoginPage> {
           SnackBar(content: Text('Login sukses: ${response.message}')),
         );
 
+        final username = response.user?.username ?? 'Pengguna';
+        final email = response.user?.email ?? '-';
+        final noHp = response.user?.noHp ?? '-';
+        final alamat = response.user?.alamat ?? '-';
+
         // Navigasi ke halaman utama
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => BottomNavigation()),
+          MaterialPageRoute(
+            builder: (context) => BottomNavigation(
+              username: response.user?.username ?? '',
+              email: response.user?.email ?? '',
+              noHp: response.user?.noHp ?? '',
+              alamat: response.user?.alamat ?? '',
+            ), // Pass username here.
+          ),
         );
       } else {
         // Jika login gagal

@@ -5,6 +5,10 @@ import 'package:staygo/Beranda/kosthomepage.dart';
 import 'package:staygo/Beranda/ojekhomepage.dart';
 
 class BerandaPage extends StatelessWidget {
+  final String username;
+
+  BerandaPage({required this.username});
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -43,7 +47,7 @@ class BerandaPage extends StatelessWidget {
                           Row(
                             children: [
                               Text(
-                                'Halo, Widia! ', // Replace with dynamic name if necessary
+                                'Halo, $username! ', // Replace with dynamic name if necessary
                                 style: TextStyle(
                                   fontSize: 20, // Larger font size
                                   fontWeight: FontWeight.bold,

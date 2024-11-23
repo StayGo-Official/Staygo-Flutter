@@ -9,7 +9,12 @@ import 'package:staygo/navigationBottom.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class Profilepage extends StatelessWidget {
-  const Profilepage({super.key});
+  final String username;
+  final String email;
+  final String noHp;
+  final String alamat;
+
+  const Profilepage({Key? key, required this.username, required this.email, required this.noHp, required this.alamat}) : super(key: key);
 
   void _launchPlayStore() async {
   const url =
@@ -95,14 +100,14 @@ class Profilepage extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Irvan Nasyakban',
+                                username,
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              Text('irfanna.syakban098@gmail.com'),
-                              Text('+6285358868477'),
+                              Text(email),
+                              Text(noHp),
                             ],
                           ),
                         ),
@@ -117,7 +122,7 @@ class Profilepage extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                           builder: (context) {
-                            return BottomNavigation();
+                            return BottomNavigation(username: username, email: email, noHp: noHp, alamat: alamat,);
                           },
                         ),
                       );
