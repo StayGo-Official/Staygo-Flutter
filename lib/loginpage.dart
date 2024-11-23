@@ -64,20 +64,9 @@ class _LoginPageState extends State<LoginPage> {
         );
       } else {
         // Jika login gagal
-        if (response.message.contains('Email tidak ditemukan')) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: Email tidak ditemukan')),
-          );
-        } else if (response.message.contains('Password Salah')) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: Password Salah')),
-          );
-        } else {
-          // Error lain
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Login gagal: ${response.message}')),
-          );
-        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(response.message)),
+        );
       }
     } catch (error) {
       // Handle error dari API

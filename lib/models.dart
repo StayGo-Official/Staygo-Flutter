@@ -164,9 +164,11 @@ class LoginResponse {
   // Factory untuk membuat LoginResponse dari JSON
   factory LoginResponse.fromJson(Map<String, dynamic> json) {
     return LoginResponse(
-      status: json['status'],
-      message: json['message'],
-      user: json['data'] != null ? User.fromJson(json['data']['user']) : null,
+      status: json['status'] ?? false,
+      message: json['msg'] ?? json['message'] ?? 'Unknown error',
+      user: json['data'] != null && json['data']['user'] != null
+          ? User.fromJson(json['data']['user'])
+          : null,
       accessToken: json['data']?['accessToken'],
     );
   }

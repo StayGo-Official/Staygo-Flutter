@@ -53,10 +53,8 @@ class RepositoryOjek {
 }
 
 class CustomerRepository {
-  final endpoint = AppConstants.baseUrl;
-
   Future<LoginResponse> loginCustomer(String email, String password) async {
-    final url = Uri.parse("$endpoint/login-customer");
+    final url = Uri.parse("${AppConstants.baseUrl}/login-customer");
 
     try {
       final body = jsonEncode({
@@ -71,8 +69,17 @@ class CustomerRepository {
       final response = await http.post(url, headers: headers, body: body);
 
       if (response.statusCode == 200) {
+        // Respons sukses
         return LoginResponse.fromJson(jsonDecode(response.body));
+      } else if (response.statusCode == 400 || response.statusCode == 404) {
+        // Respons error dengan status 400 (bad request) atau 404 (not found)
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        return LoginResponse(
+          status: false,
+          message: responseData['msg'] ?? 'Unknown error',
+        );
       } else {
+        // Error lain
         return LoginResponse(
           status: false,
           message: "Server error: ${response.statusCode}",
