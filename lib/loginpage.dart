@@ -61,6 +61,7 @@ class _LoginPageState extends State<LoginPage> {
         final email = response.user?.email ?? '-';
         final noHp = response.user?.noHp ?? '-';
         final alamat = response.user?.alamat ?? '-';
+        final accessToken = response.accessToken ?? '';
 
         // Navigasi ke halaman utama
         Navigator.pushReplacement(
@@ -71,6 +72,7 @@ class _LoginPageState extends State<LoginPage> {
               email: response.user?.email ?? '',
               noHp: response.user?.noHp ?? '',
               alamat: response.user?.alamat ?? '',
+              accessToken: accessToken,
             ), // Pass username here.
           ),
         );

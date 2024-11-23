@@ -23,7 +23,7 @@ class _RegisterpageState extends State<Registerpage> {
               children: [
                 Image.asset(
                   'assets/gambar-register.png',
-                  height: 240,
+                  height: 200,
                 ),
                 Align(
                   alignment: Alignment.centerLeft,
@@ -39,11 +39,7 @@ class _RegisterpageState extends State<Registerpage> {
                     ),
                   ),
                 ),
-                SizedBox(
-                  height: 35,
-                ),
 
-                // Email with "@" Icon
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 25.0),
                   child: Row(
@@ -61,13 +57,42 @@ class _RegisterpageState extends State<Registerpage> {
                               borderSide:
                                   BorderSide(color: Colors.black, width: 2.0),
                             ),
-                            hintText: 'Nama',
+                            hintText: 'Username',
                           ),
                         ),
                       ),
                     ],
                   ),
                 ),
+                SizedBox(
+                  height: 10,
+                ),
+
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                  child: Row(
+                    children: [
+                      Icon(Icons.alternate_email, color: Colors.grey), // Icon "@"
+                      SizedBox(width: 10), // Padding antara icon dan TextField
+                      Expanded(
+                        child: TextField(
+                          decoration: InputDecoration(
+                            border: UnderlineInputBorder(),
+                            enabledBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: Colors.black),
+                            ),
+                            focusedBorder: UnderlineInputBorder(
+                              borderSide:
+                                  BorderSide(color: Colors.black, width: 2.0),
+                            ),
+                            hintText: 'Email ID',
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
                 SizedBox(
                   height: 10,
                 ),
@@ -105,7 +130,7 @@ class _RegisterpageState extends State<Registerpage> {
                   padding: const EdgeInsets.symmetric(horizontal: 25.0),
                   child: Row(
                     children: [
-                      Icon(Icons.alternate_email, color: Colors.grey), // Icon "@"
+                      Icon(Icons.location_on, color: Colors.grey,), // Icon "@"
                       SizedBox(width: 10), // Padding antara icon dan TextField
                       Expanded(
                         child: TextField(
@@ -118,7 +143,7 @@ class _RegisterpageState extends State<Registerpage> {
                               borderSide:
                                   BorderSide(color: Colors.black, width: 2.0),
                             ),
-                            hintText: 'Email ID',
+                            hintText: 'Alamat',
                           ),
                         ),
                       ),
@@ -151,6 +176,52 @@ class _RegisterpageState extends State<Registerpage> {
                                   BorderSide(color: Colors.black, width: 2.0),
                             ),
                             hintText: 'Password',
+
+                            // Ikon mata di sebelah kanan untuk menampilkan atau menyembunyikan password
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _isObscure
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _isObscure =
+                                      !_isObscure; // Mengubah status _isObscure ketika ikon ditekan
+                                });
+                              },
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                SizedBox(
+                  height: 10,
+                ),
+
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                  child: Row(
+                    children: [
+                      Icon(Icons.lock_clock_outlined, color: Colors.grey), // Icon "locked"
+                      SizedBox(width: 10), // Padding antara icon dan TextField
+                      Expanded(
+                        child: TextField(
+                          obscureText:
+                              _isObscure, // Atur apakah password disembunyikan atau tidak
+                          decoration: InputDecoration(
+                            border: UnderlineInputBorder(),
+                            enabledBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: Colors.black),
+                            ),
+                            focusedBorder: UnderlineInputBorder(
+                              borderSide:
+                                  BorderSide(color: Colors.black, width: 2.0),
+                            ),
+                            hintText: 'Konfirmasi Password',
 
                             // Ikon mata di sebelah kanan untuk menampilkan atau menyembunyikan password
                             suffixIcon: IconButton(
@@ -251,7 +322,7 @@ class _RegisterpageState extends State<Registerpage> {
                   ),
                 ),
                 SizedBox(
-                  height: 25,
+                  height: 10,
                 ),
 
                 Row(

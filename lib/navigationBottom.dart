@@ -9,13 +9,15 @@ class BottomNavigation extends StatefulWidget {
   final String email;
   final String noHp;
   final String alamat;
+  final String accessToken;
 
   const BottomNavigation(
       {Key? key,
       required this.username,
       required this.email,
       required this.noHp,
-      required this.alamat})
+      required this.alamat,
+      required this.accessToken})
       : super(key: key);
 
   @override
@@ -40,6 +42,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
         email: widget.email,
         noHp: widget.noHp,
         alamat: widget.alamat,
+        accessToken: widget.accessToken,
       ),
     ];
   }

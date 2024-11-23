@@ -92,4 +92,28 @@ class CustomerRepository {
       );
     }
   }
+
+  // Fungsi logout customer
+  Future<bool> logoutCustomer(String accessToken) async {
+    final url = Uri.parse("${AppConstants.baseUrl}/logout-customer");
+
+    try {
+      final response = await http.delete(
+        url,
+        headers: {
+          "Authorization": "Bearer $accessToken",
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> responseBody = jsonDecode(response.body);
+        return responseBody['status'] == true;
+      } else {
+        return false; // Logout gagal
+      }
+    } catch (error) {
+      print("Error during logout: $error");
+      return false;
+    }
+  }
 }

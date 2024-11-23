@@ -7,14 +7,16 @@ import 'package:staygo/Profile/resetPassword.dart';
 import 'package:staygo/loginpage.dart';
 import 'package:staygo/navigationBottom.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:staygo/repository.dart';
 
 class Profilepage extends StatelessWidget {
   final String username;
   final String email;
   final String noHp;
   final String alamat;
+  final String accessToken;
 
-  const Profilepage({Key? key, required this.username, required this.email, required this.noHp, required this.alamat}) : super(key: key);
+  const Profilepage({Key? key, required this.username, required this.email, required this.noHp, required this.alamat, required this.accessToken}) : super(key: key);
 
   void _launchPlayStore() async {
   const url =
@@ -25,6 +27,35 @@ class Profilepage extends StatelessWidget {
     throw 'Could not launch $url';
   }
 }
+
+void _logout(BuildContext context) async {
+    final repository = CustomerRepository();
+
+    try {
+      final success = await repository.logoutCustomer(accessToken);
+
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Berhasil logout")),
+        );
+
+        // Redirect ke LoginPage setelah logout
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginPage()),
+          (route) => false,
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Gagal logout")),
+        );
+      }
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: $error")),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -122,7 +153,7 @@ class Profilepage extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                           builder: (context) {
-                            return BottomNavigation(username: username, email: email, noHp: noHp, alamat: alamat,);
+                            return BottomNavigation(username: username, email: email, noHp: noHp, alamat: alamat, accessToken: accessToken,);
                           },
                         ),
                       );
@@ -317,17 +348,7 @@ class Profilepage extends StatelessWidget {
                   fontWeight: FontWeight.bold, // Optional: make it bold
                 ),
               ),
-              onTap: () {
-                // Navigate or perform actions
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) {
-                      return LoginPage();
-                    },
-                  ),
-                );
-              },
+              onTap: () => _logout(context),
             ),
           ],
         ),
