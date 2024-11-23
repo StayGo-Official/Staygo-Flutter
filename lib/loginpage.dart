@@ -6,8 +6,11 @@ import 'package:staygo/navigationBottom.dart';
 import 'package:staygo/registerPage.dart';
 import 'lupapassword.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:staygo/repository.dart'; // Import repository untuk login
+import 'package:staygo/models.dart'; // Import model LoginResponse dan User
 
-final Uri _LoginGoogleUrl = Uri.parse('https://accounts.google.com/v3/signin/identifier?authuser=0&continue=https%3A%2F%2Fmyaccount.google.com%2F%3Futm_source%3Dsign_in_no_continue%26pli%3D1&ec=GAlAwAE&hl=in&service=accountsettings&flowName=GlifWebSignIn&flowEntry=AddSession&dsh=S537678445%3A1729317055575994&ddm=0');
+final Uri _LoginGoogleUrl = Uri.parse(
+    'https://accounts.google.com/v3/signin/identifier?authuser=0&continue=https%3A%2F%2Fmyaccount.google.com%2F%3Futm_source%3Dsign_in_no_continue%26pli%3D1&ec=GAlAwAE&hl=in&service=accountsettings&flowName=GlifWebSignIn&flowEntry=AddSession&dsh=S537678445%3A1729317055575994&ddm=0');
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -17,12 +20,74 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final CustomerRepository _repository = CustomerRepository();
   // Variabel untuk menyembunyikan atau menampilkan password
   bool _isObscure = true;
+  bool _isLoading = false; // Indikator loading saat login
 
   Future<void> _launchGoogleLogin() async {
     if (!await launchUrl(_LoginGoogleUrl)) {
       throw Exception('Could not launch $_LoginGoogleUrl');
+    }
+  }
+
+  Future<void> _handleLogin() async {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Email dan password tidak boleh kosong')),
+      );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final response = await _repository.loginCustomer(email, password);
+
+      if (response.status) {
+        // Jika login berhasil
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Login sukses: ${response.message}')),
+        );
+
+        // Navigasi ke halaman utama
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => BottomNavigation()),
+        );
+      } else {
+        // Jika login gagal
+        if (response.message.contains('Email tidak ditemukan')) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error: Email tidak ditemukan')),
+          );
+        } else if (response.message.contains('Password Salah')) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error: Password Salah')),
+          );
+        } else {
+          // Error lain
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Login gagal: ${response.message}')),
+          );
+        }
+      }
+    } catch (error) {
+      // Handle error dari API
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Terjadi kesalahan: ${error.toString()}')),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -66,10 +131,12 @@ class _LoginPageState extends State<LoginPage> {
                   padding: const EdgeInsets.symmetric(horizontal: 25.0),
                   child: Row(
                     children: [
-                      Icon(Icons.alternate_email, color: Colors.grey), // Icon "@"
+                      Icon(Icons.alternate_email,
+                          color: Colors.grey), // Icon "@"
                       SizedBox(width: 10), // Padding antara icon dan TextField
                       Expanded(
                         child: TextField(
+                          controller: _emailController,
                           decoration: InputDecoration(
                             border: UnderlineInputBorder(),
                             enabledBorder: UnderlineInputBorder(
@@ -95,10 +162,12 @@ class _LoginPageState extends State<LoginPage> {
                   padding: const EdgeInsets.symmetric(horizontal: 25.0),
                   child: Row(
                     children: [
-                      Icon(Icons.lock_clock_outlined, color: Colors.grey), // Icon "locked"
+                      Icon(Icons.lock_clock_outlined,
+                          color: Colors.grey), // Icon "locked"
                       SizedBox(width: 10), // Padding antara icon dan TextField
                       Expanded(
                         child: TextField(
+                          controller: _passwordController,
                           obscureText:
                               _isObscure, // Atur apakah password disembunyikan atau tidak
                           decoration: InputDecoration(
@@ -168,16 +237,7 @@ class _LoginPageState extends State<LoginPage> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 25.0),
                   child: GestureDetector(
-                    onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) {
-                              return BottomNavigation();
-                            },
-                          ),
-                        );
-                      },
+                    onTap: _isLoading ? null : _handleLogin,
                     child: Container(
                       padding: EdgeInsets.all(15),
                       decoration: BoxDecoration(
@@ -185,13 +245,15 @@ class _LoginPageState extends State<LoginPage> {
                         borderRadius: BorderRadius.circular(50),
                       ),
                       child: Center(
-                        child: Text(
-                          'Masuk',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 15,
-                          ),
-                        ),
+                        child: _isLoading
+                            ? CircularProgressIndicator(color: Colors.white)
+                            : Text(
+                                'Masuk',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 15,
+                                ),
+                              ),
                       ),
                     ),
                   ),
@@ -277,9 +339,7 @@ class _LoginPageState extends State<LoginPage> {
                     Text(
                       'Belum punya akun?',
                       style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey
-                      ),
+                          fontWeight: FontWeight.bold, color: Colors.grey),
                     ),
                     GestureDetector(
                       onTap: () {

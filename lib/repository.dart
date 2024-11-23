@@ -51,3 +51,38 @@ class RepositoryOjek {
   }
 
 }
+
+class CustomerRepository {
+  final endpoint = AppConstants.baseUrl;
+
+  Future<LoginResponse> loginCustomer(String email, String password) async {
+    final url = Uri.parse("$endpoint/login-customer");
+
+    try {
+      final body = jsonEncode({
+        "email": email,
+        "password": password,
+      });
+
+      final headers = {
+        "Content-Type": "application/json",
+      };
+
+      final response = await http.post(url, headers: headers, body: body);
+
+      if (response.statusCode == 200) {
+        return LoginResponse.fromJson(jsonDecode(response.body));
+      } else {
+        return LoginResponse(
+          status: false,
+          message: "Server error: ${response.statusCode}",
+        );
+      }
+    } catch (error) {
+      return LoginResponse(
+        status: false,
+        message: "Error: ${error.toString()}",
+      );
+    }
+  }
+}
