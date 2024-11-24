@@ -9,30 +9,71 @@ import 'package:staygo/navigationBottom.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:staygo/repository.dart';
 
-class Profilepage extends StatelessWidget {
+class Profilepage extends StatefulWidget {
   final String username;
+  final String nama;
   final String email;
   final String noHp;
   final String alamat;
+  final String ttl;
+  final String image;
   final String accessToken;
+  final int customerId;
 
-  const Profilepage({Key? key, required this.username, required this.email, required this.noHp, required this.alamat, required this.accessToken}) : super(key: key);
+  const Profilepage({
+    Key? key,
+    required this.username,
+    required this.nama,
+    required this.email,
+    required this.noHp,
+    required this.alamat,
+    required this.ttl,
+    required this.image,
+    required this.accessToken,
+    required this.customerId,
+  }) : super(key: key);
 
-  void _launchPlayStore() async {
-  const url =
-      'https://play.google.com'; // Ganti 'com.example.staygo' dengan ID aplikasi Play Store yang ingin dibuka
-  if (await canLaunch(url)) {
-    await launch(url);
-  } else {
-    throw 'Could not launch $url';
-  }
+  @override
+  State<Profilepage> createState() => _ProfilepageState();
 }
 
-void _logout(BuildContext context) async {
+class _ProfilepageState extends State<Profilepage> {
+  // Variabel untuk menyimpan data profil yang bisa diperbarui
+  late String username;
+  late String nama;
+  late String email;
+  late String noHp;
+  late String alamat;
+  late String ttl;
+  late String image;
+
+  @override
+  void initState() {
+    super.initState();
+    // Inisialisasi data dari widget
+    username = widget.username;
+    nama = widget.nama;
+    email = widget.email;
+    noHp = widget.noHp;
+    alamat = widget.alamat;
+    ttl = widget.ttl;
+    image = widget.image;
+  }
+
+  void _launchPlayStore() async {
+    const url = 'https://play.google.com'; // Ganti dengan URL Play Store Anda
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
+
+  void _logout(BuildContext context) async {
     final repository = CustomerRepository();
 
     try {
-      final success = await repository.logoutCustomer(accessToken);
+      final success = await repository.logoutCustomer(widget.accessToken);
 
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -65,13 +106,13 @@ void _logout(BuildContext context) async {
         backgroundColor: const Color.fromARGB(0, 255, 255, 255),
         elevation: 0,
         leading: Container(
-          margin: EdgeInsets.all(8), // Margin to add space around the button
+          margin: EdgeInsets.all(8),
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: Colors.white, // Background color of the circle
+            color: Colors.white,
           ),
           child: Transform.translate(
-            offset: Offset(4, 0), // Shift to the right by 4 pixels
+            offset: Offset(4, 0),
             child: IconButton(
               icon: Icon(Icons.arrow_back_ios, color: Colors.black),
               onPressed: () {
@@ -86,7 +127,7 @@ void _logout(BuildContext context) async {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Space above the white container
+            // Header Profil
             Container(
               padding: EdgeInsets.all(15), // Padding for the outer container
               child: Column(
@@ -153,7 +194,17 @@ void _logout(BuildContext context) async {
                         context,
                         MaterialPageRoute(
                           builder: (context) {
-                            return BottomNavigation(username: username, email: email, noHp: noHp, alamat: alamat, accessToken: accessToken,);
+                            return BottomNavigation(
+                              username: username,
+                              nama: nama,
+                              email: email,
+                              noHp: noHp,
+                              alamat: alamat,
+                              ttl: ttl,
+                              image: image,
+                              accessToken: widget.accessToken,
+                              customerId: widget.customerId,
+                            );
                           },
                         ),
                       );
@@ -227,9 +278,10 @@ void _logout(BuildContext context) async {
                 ],
               ),
             ),
+
+            // Tombol Edit dan Pengaturan
             ListTile(
-              leading: Icon(Icons.edit,
-                  color: Colors.black), // Change icon as needed
+              leading: Icon(Icons.edit, color: Colors.black),
               title: Text('Ubah Data Akun'),
               trailing: Icon(Icons.arrow_forward_ios, size: 16),
               onTap: () {
@@ -237,7 +289,33 @@ void _logout(BuildContext context) async {
                   context,
                   MaterialPageRoute(
                     builder: (context) {
-                      return EditProfile();
+                      return EditProfile(
+                        username: username,
+                        nama: nama,
+                        email: email,
+                        noHp: noHp,
+                        alamat: alamat,
+                        ttl: ttl,
+                        image: image, // Pastikan image terbaru diteruskan
+                        accessToken: widget.accessToken,
+                        customerId: widget.customerId,
+                        onProfileUpdated: (updatedData) {
+                          setState(() {
+                            if (updatedData['nama'] != null)
+                              nama = updatedData['nama'];
+                            if (updatedData['email'] != null)
+                              email = updatedData['email'];
+                            if (updatedData['noHp'] != null)
+                              noHp = updatedData['noHp'];
+                            if (updatedData['alamat'] != null)
+                              alamat = updatedData['alamat'];
+                            if (updatedData['ttl'] != null)
+                              ttl = updatedData['ttl'];
+                            if (updatedData['image'] != null)
+                              image = updatedData['image'];
+                          });
+                        },
+                      );
                     },
                   ),
                 );

@@ -141,11 +141,11 @@ class _HistoryPemesananState extends State<HistoryPemesanan> {
   Widget buildOjekSection() {
     // Put your 'untuk Ojek' code here and return the widget
     return SizedBox(
-      height: 540,
+      height: 520,
       child: GridView.builder(
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
-          childAspectRatio: 0.7,
+          childAspectRatio: 0.75,
         ),
         itemCount: items.length,
         itemBuilder: (context, index) {

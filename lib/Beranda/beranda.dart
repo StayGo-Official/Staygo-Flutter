@@ -6,8 +6,9 @@ import 'package:staygo/Beranda/ojekhomepage.dart';
 
 class BerandaPage extends StatelessWidget {
   final String username;
+  final String accessToken;
 
-  BerandaPage({required this.username});
+  BerandaPage({required this.username, required this.accessToken});
 
   @override
   Widget build(BuildContext context) {
@@ -94,7 +95,7 @@ class BerandaPage extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                           builder: (context) {
-                            return Ojekhomepage();
+                            return Ojekhomepage(username: username);
                           },
                         ),
                       );
@@ -161,7 +162,7 @@ class BerandaPage extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                           builder: (context) {
-                            return kostHomepage();
+                            return kostHomepage(username: username, accessToken: accessToken,);
                           },
                         ),
                       );

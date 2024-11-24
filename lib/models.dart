@@ -96,10 +96,14 @@ class Ojek {
 class User {
   final int id;
   final String username;
+  final String nama;
   final String email;
   final String noHp;
   final String alamat;
+  final String ttl;
   final String password;
+  final String? image; // Filename of the image
+  final String? url; // Full URL of the image
   final String refreshToken;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -107,45 +111,58 @@ class User {
   User({
     required this.id,
     required this.username,
+    required this.nama,
     required this.email,
     required this.noHp,
     required this.alamat,
+    required this.ttl,
     required this.password,
+    required this.image,
+    required this.url,
     required this.refreshToken,
     required this.createdAt,
     required this.updatedAt,
   });
 
-  // Factory untuk membuat User dari JSON
+  // Factory for creating a User from JSON
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: json['id'],
       username: json['username'],
+      nama: json['nama'],
       email: json['email'],
       noHp: json['noHp'],
       alamat: json['alamat'],
+      ttl: json['ttl'],
       password: json['password'],
+      image: json['image'], // Extract the filename
+      url: json['url'], // Extract the full URL
       refreshToken: json['refresh_token'],
       createdAt: DateTime.parse(json['createdAt']),
       updatedAt: DateTime.parse(json['updatedAt']),
     );
   }
 
-  // Konversi User ke JSON
+  // Convert User to JSON
   Map<String, dynamic> toJson() {
     return {
       'id': id,
       'username': username,
+      'nama': nama,
       'email': email,
       'noHp': noHp,
       'alamat': alamat,
+      'ttl': ttl,
       'password': password,
+      'image': image,
+      'url': url,
       'refresh_token': refreshToken,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
     };
   }
 }
+
 
 // Model untuk Response Login
 class LoginResponse {
@@ -182,6 +199,41 @@ class LoginResponse {
         'user': user?.toJson(),
         'accessToken': accessToken,
       },
+    };
+  }
+}
+
+class CustomerRegistration {
+  final String username;
+  final String nama;
+  final String email;
+  final String noHp;
+  final String alamat;
+  final String ttl;
+  final String password;
+  final String confPassword;
+
+  CustomerRegistration({
+    required this.username,
+    required this.nama,
+    required this.email,
+    required this.noHp,
+    required this.alamat,
+    required this.ttl,
+    required this.password,
+    required this.confPassword,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'username': username,
+      'nama': nama,
+      'email': email,
+      'noHp': noHp,
+      'alamat': alamat,
+      'ttl': ttl,
+      'password': password,
+      'confPassword': confPassword,
     };
   }
 }

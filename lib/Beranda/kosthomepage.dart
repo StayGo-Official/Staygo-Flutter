@@ -7,7 +7,12 @@ import 'package:staygo/models.dart';
 import 'package:staygo/repository.dart';
 
 class kostHomepage extends StatefulWidget {
-  const kostHomepage({super.key});
+  final String username;
+  final String accessToken;
+
+  const kostHomepage(
+      {Key? key, required this.username, required this.accessToken})
+      : super(key: key);
 
   @override
   State<kostHomepage> createState() => _kostHomepageState();
@@ -54,7 +59,9 @@ class _kostHomepageState extends State<kostHomepage> {
                         Row(
                           children: [
                             Text(
-                              'Halo, Widia! ', // Replace with dynamic name if necessary
+                              'Halo, ' +
+                                  widget
+                                      .username, // Replace with dynamic name if necessary
                               style: TextStyle(
                                 fontSize: 20, // Larger font size
                                 fontWeight: FontWeight.bold,
@@ -85,7 +92,8 @@ class _kostHomepageState extends State<kostHomepage> {
                         context,
                         MaterialPageRoute(
                           builder: (context) {
-                            return FavoritePage();
+                            return FavoritePage(
+                                accessToken: widget.accessToken);
                           },
                         ),
                       );
@@ -360,10 +368,17 @@ class _kostHomepageState extends State<kostHomepage> {
                                         Icon(Icons.location_on_outlined,
                                             size: 16, color: Colors.blue),
                                         SizedBox(width: 5),
-                                        Text(
-                                          kost.alamat
-                                              as String, // Cast to String
-                                          style: TextStyle(fontSize: 12),
+                                        Expanded(
+                                          // Tambahkan Expanded di sekitar Text untuk membatasi area teks
+                                          child: Text(
+                                            kost.alamat
+                                                as String, // Cast to String
+                                            style: TextStyle(fontSize: 12),
+                                            maxLines:
+                                                1, // Batasi teks menjadi satu baris
+                                            overflow: TextOverflow
+                                                .ellipsis, // Tampilkan ... jika teks terlalu panjang
+                                          ),
                                         ),
                                       ],
                                     ),

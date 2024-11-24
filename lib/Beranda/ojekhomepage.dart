@@ -7,7 +7,10 @@ import 'package:staygo/models.dart';
 import 'package:staygo/repository.dart';
 
 class Ojekhomepage extends StatefulWidget {
-  const Ojekhomepage({super.key});
+  final String username;
+
+  const Ojekhomepage(
+      { Key? key, required this.username }) : super(key: key);
 
   @override
   State<Ojekhomepage> createState() => _OjekhomepageState();
@@ -26,6 +29,7 @@ class _OjekhomepageState extends State<Ojekhomepage> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
@@ -86,7 +90,7 @@ class _OjekhomepageState extends State<Ojekhomepage> {
                             fontWeight: FontWeight.normal), // Normal weight
                       ),
                       TextSpan(
-                        text: 'Widia', // Second part of the text
+                        text: widget.username, // Second part of the text
                         style: TextStyle(
                             fontWeight: FontWeight.bold), // Bold weight
                       ),
@@ -203,7 +207,7 @@ class _OjekhomepageState extends State<Ojekhomepage> {
                     return GridView.builder(
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2, // Two cards per row
-                        childAspectRatio: 0.7,
+                        childAspectRatio: 0.75,
                       ),
                       itemCount: ojekListData.length, // Number of items
                       itemBuilder: (context, index) {

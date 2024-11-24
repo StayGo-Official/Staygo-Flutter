@@ -1,20 +1,21 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:staygo/models.dart';
 import 'package:staygo/constants.dart';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 
 class RepositoryKost {
-
   final endpoint = AppConstants.baseUrl;
 
-  Future <List<Kost>> getDataKost() async {
+  Future<List<Kost>> getDataKost() async {
     try {
       final response = await http.get(Uri.parse(endpoint + '/kost'));
       if (response.statusCode == 200) {
         final List<dynamic> responseData = json.decode(response.body);
-        final List<Kost> kostList = responseData
-            .map((json) => Kost.fromJson(json)).toList(); 
+        final List<Kost> kostList =
+            responseData.map((json) => Kost.fromJson(json)).toList();
 
         return kostList;
       } else {
@@ -25,20 +26,18 @@ class RepositoryKost {
       throw Exception('Failed to fetch data');
     }
   }
-
 }
 
 class RepositoryOjek {
-
   final endpoint = AppConstants.baseUrl;
 
-  Future <List<Ojek>> getDataOjek() async {
+  Future<List<Ojek>> getDataOjek() async {
     try {
       final response = await http.get(Uri.parse(endpoint + '/ojek'));
       if (response.statusCode == 200) {
         final List<dynamic> responseData = json.decode(response.body);
-        final List<Ojek> ojekList = responseData
-            .map((json) => Ojek.fromJson(json)).toList(); 
+        final List<Ojek> ojekList =
+            responseData.map((json) => Ojek.fromJson(json)).toList();
 
         return ojekList;
       } else {
@@ -49,7 +48,6 @@ class RepositoryOjek {
       throw Exception('Failed to fetch data');
     }
   }
-
 }
 
 class CustomerRepository {
@@ -114,6 +112,119 @@ class CustomerRepository {
     } catch (error) {
       print("Error during logout: $error");
       return false;
+    }
+  }
+
+  Future<Map<String, dynamic>> registerCustomer(
+      CustomerRegistration customer) async {
+    final url = Uri.parse("${AppConstants.baseUrl}/register-customer");
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode(customer.toJson()),
+      );
+
+      if (response.statusCode == 200) {
+        // Parse success response
+        return jsonDecode(response.body);
+      } else {
+        // Handle errors
+        final errorResponse = jsonDecode(response.body);
+        throw Exception(errorResponse['msg'] ?? 'Registration failed');
+      }
+    } catch (error) {
+      throw Exception("Error during registration: $error");
+    }
+  }
+
+  // Fungsi untuk update data profile customer
+  Future<Map<String, dynamic>> updateCustomerProfile({
+    required String accessToken,
+    required int customerId,
+    required Map<String, dynamic> profileData,
+    File? imageFile,
+  }) async {
+    final url = Uri.parse("${AppConstants.baseUrl}/update-profile/$customerId");
+    final request = http.MultipartRequest('PATCH', url);
+
+    // Add Authorization header
+    request.headers['Authorization'] = 'Bearer $accessToken';
+
+    // Add profile data to request fields
+    profileData.forEach((key, value) {
+      request.fields[key] = value.toString();
+    });
+
+    // Add the image file if present
+    if (imageFile != null) {
+      request.files.add(
+        await http.MultipartFile.fromPath(
+          'file',
+          imageFile.path,
+          contentType: MediaType('image', 'jpeg'),
+        ),
+      );
+    }
+
+    try {
+      final response = await request.send();
+
+      if (response.statusCode == 200) {
+        // Parse the response body
+        final responseBody = await response.stream.bytesToString();
+        final responseJson = jsonDecode(responseBody);
+
+        return {
+          'status': responseJson['status'] ?? false,
+          'message': responseJson['message'] ?? 'Update failed',
+          'imagePath': responseJson['imagePath'], // Return the imagePath
+        };
+      } else {
+        final responseBody = await response.stream.bytesToString();
+        print("Error updating profile: $responseBody");
+        return {
+          'status': false,
+          'message': 'Update failed',
+          'imagePath': null,
+        };
+      }
+    } catch (e) {
+      print("Exception occurred: $e");
+      return {
+        'status': false,
+        'message': 'Exception occurred',
+        'imagePath': null,
+      };
+    }
+  }
+}
+
+class FavoriteKostRepository {
+  final endpoint = AppConstants.baseUrl;
+
+  // Fetch Favorite Kost
+  Future<List<dynamic>> fetchFavoriteKost(String accessToken) async {
+    final url = Uri.parse('$endpoint/favorite-kost');
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body); // Return the parsed JSON response
+      } else {
+        throw Exception('Failed to load favorite kost');
+      }
+    } catch (error) {
+      print('Error fetching favorite kost: $error');
+      throw Exception('Error fetching favorite kost');
     }
   }
 }

@@ -3,27 +3,35 @@
 import 'package:flutter/material.dart';
 import 'package:staygo/kost/detailkost.dart';
 import 'package:staygo/ojek/detailojek.dart';
+import 'package:staygo/constants.dart';
+import 'package:staygo/repository.dart';
 
 class FavoritePage extends StatefulWidget {
-  const FavoritePage({super.key});
+  final String accessToken;
+
+  const FavoritePage({Key? key, required this.accessToken}) : super(key: key);
 
   @override
   State<FavoritePage> createState() => _FavoritePageState();
 }
 
 class _FavoritePageState extends State<FavoritePage> {
+  final FavoriteKostRepository favoriteRepo = FavoriteKostRepository();
+
+  late Future<List<dynamic>> _favoriteKost;
+
+  @override
+  void initState() {
+    super.initState();
+    _favoriteKost = favoriteRepo.fetchFavoriteKost(widget.accessToken);
+  }
+
   int _currentIndex = 0;
 
   String selectedOption = 'Ojek';
 
   final List<Map<String, String>> items = [
     {'name': 'Irvan', 'gender': 'Cowok', 'image': 'assets/kos2.png'},
-    {'name': 'Taufik', 'gender': 'Cowok', 'image': 'assets/kos2.png'},
-    {'name': 'Widya', 'gender': 'Cewek', 'image': 'assets/kos2.png'},
-    {'name': 'Ahnad', 'gender': 'Cowok', 'image': 'assets/kos2.png'},
-    {'name': 'fauzan', 'gender': 'Cowok', 'image': 'assets/kos2.png'},
-    {'name': 'Siti', 'gender': 'Cewek', 'image': 'assets/kos2.png'},
-    {'name': 'Maya', 'gender': 'Cewek', 'image': 'assets/kos2.png'},
   ];
 
   @override
@@ -144,11 +152,11 @@ class _FavoritePageState extends State<FavoritePage> {
   Widget buildOjekSection() {
     // Put your 'untuk Ojek' code here and return the widget
     return SizedBox(
-      height: 540,
+      height: 520,
       child: GridView.builder(
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
-          childAspectRatio: 0.7,
+          childAspectRatio: 0.75,
         ),
         itemCount: items.length,
         itemBuilder: (context, index) {
@@ -254,306 +262,136 @@ class _FavoritePageState extends State<FavoritePage> {
   }
 
   Widget buildKostSection() {
-    // Put your 'untuk Kost' code here and return the widget
-    return Column(
-      children: [
-        SizedBox(
-          height: 20,
-        ),
-        GestureDetector(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) {
-                  return DetailKost();
-                },
-              ),
-            );
-          },
-          child: Padding(
-            padding: const EdgeInsets.only(left: 15, right: 15, bottom: 15),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(15),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.3), // Shadow color
-                    spreadRadius: 3,
-                    blurRadius: 7,
-                    offset: Offset(0, 3), // Shadow position
+  return FutureBuilder<List<dynamic>>(
+    future: _favoriteKost, // Use the fetched favorite kost data
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return const Center(child: CircularProgressIndicator());
+      } else if (snapshot.hasError) {
+        return Center(child: Text('Error: ${snapshot.error}'));
+      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+        return const Center(child: Text('No favorite kost found'));
+      } else {
+        final favoriteKostList = snapshot.data!;
+        return ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: favoriteKostList.length,
+          itemBuilder: (context, index) {
+            final kost = favoriteKostList[index]['kost']; // Access kost data
+            return GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DetailKost(),
                   ),
-                ],
-              ),
-              padding: const EdgeInsets.all(
-                  15.0), // Padding inside the small container
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Image Section
-                  Container(
-                    width: 100, // Smaller width for the image
-                    height: 100, // Smaller height for the image
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      image: DecorationImage(
-                        image: AssetImage(
-                            'assets/kos1.png'), // Replace with your kost image
-                        fit:
-                            BoxFit.cover, // Ensure the image fits the container
+                );
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(15),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.3), // Shadow color
+                        spreadRadius: 3,
+                        blurRadius: 7,
+                        offset: const Offset(0, 3), // Shadow position
                       ),
-                    ),
+                    ],
                   ),
-                  SizedBox(width: 15), // Space between image and text
-                  // Detail Section
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Text(
-                              'Kost Pak Mukhsin',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black,
-                              ),
-                            ),
-                            Spacer(),
-                            IconButton(
-                              icon: Icon(Icons.favorite, color: Colors.red),
-                              iconSize: 20,
-                              onPressed: () {
-                                // Tambahkan aksi yang diinginkan ketika tombol ditekan
-                                print('Favorit ditekan');
-                              },
-                            ),
-                          ],
-                        ), // Space between elements
-                        Row(
-                          children: [
-                            Icon(Icons.calendar_today,
-                                size: 23, color: Colors.blue),
-                            SizedBox(width: 5),
-                            Text('9/8/2024 - 9/8/2025'),
-                          ],
+                  padding: const EdgeInsets.all(15), // Padding inside the container
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Image Section
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Image.network(
+                          AppConstants.baseUrlImage + kost['images'][0], // First image from the URL array
+                          height: 100,
+                          width: 100,
+                          fit: BoxFit.cover,
                         ),
-                        SizedBox(height: 10), // Space between elements
-                        Row(
-                          children: [
-                            Icon(Icons.location_on_outlined,
-                                size: 23, color: Colors.blue),
-                            SizedBox(width: 5),
-                            Text('Jl. Bukit Indah'),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        GestureDetector(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) {
-                  return DetailKost();
-                },
-              ),
-            );
-          },
-          child: Padding(
-            padding: const EdgeInsets.only(left: 15, right: 15, bottom: 15),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(15),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.3), // Shadow color
-                    spreadRadius: 3,
-                    blurRadius: 7,
-                    offset: Offset(0, 3), // Shadow position
-                  ),
-                ],
-              ),
-              padding: const EdgeInsets.all(
-                  15.0), // Padding inside the small container
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Image Section
-                  Container(
-                    width: 100, // Smaller width for the image
-                    height: 100, // Smaller height for the image
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      image: DecorationImage(
-                        image: AssetImage(
-                            'assets/kos2.png'), // Replace with your kost image
-                        fit:
-                            BoxFit.cover, // Ensure the image fits the container
                       ),
-                    ),
-                  ),
-                  SizedBox(width: 15), // Space between image and text
-                  // Detail Section
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
+                      const SizedBox(width: 15), // Space between image and text
+                      // Detail Section
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Expanded(
-                              child: Text(
-                                'Kost Murah dan Bersih',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    kost['namaKost'],
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black,
+                                    ),
+                                    overflow: TextOverflow.ellipsis, // Prevent overflow
+                                  ),
                                 ),
-                              ),
+                                IconButton(
+                                  icon: const Icon(Icons.favorite, color: Colors.red),
+                                  iconSize: 20,
+                                  onPressed: () {
+                                    // Add favorite button action if needed
+                                    print('Favorite tapped');
+                                  },
+                                ),
+                              ],
                             ),
-                            IconButton(
-                              icon: Icon(Icons.favorite, color: Colors.red),
-                              iconSize: 20,
-                              onPressed: () {
-                                // Tambahkan aksi yang diinginkan ketika tombol ditekan
-                                print('Favorit ditekan');
-                              },
+                            const SizedBox(height: 5),
+                            Row(
+                              children: [
+                                const Icon(Icons.location_on_outlined,
+                                    size: 18, color: Colors.blue),
+                                const SizedBox(width: 5),
+                                Expanded(
+                                  child: Text(
+                                    kost['alamat'],
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.grey,
+                                    ),
+                                    overflow: TextOverflow.ellipsis, // Prevent overflow
+                                  ),
+                                ),
+                              ],
                             ),
-                          ],
-                        ), // Space between elements
-                        Row(
-                          children: [
-                            Icon(Icons.calendar_today,
-                                size: 23, color: Colors.blue),
-                            SizedBox(width: 5),
-                            Text('9/8/2024 - 9/8/2025'),
+                            const SizedBox(height: 5),
+                            Row(
+                              children: [
+                                const Icon(Icons.price_change_outlined,
+                                    size: 18, color: Colors.green),
+                                const SizedBox(width: 5),
+                                Text(
+                                  'Rp${kost['hargaPerbulan']}/bulan',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ],
                         ),
-                        SizedBox(height: 10), // Space between elements
-                        Row(
-                          children: [
-                            Icon(Icons.location_on_outlined,
-                                size: 23, color: Colors.blue),
-                            SizedBox(width: 5),
-                            Text('Jl. Mawar'),
-                          ],
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        GestureDetector(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) {
-                  return DetailKost();
-                },
+                ),
               ),
             );
           },
-          child: Padding(
-            padding: const EdgeInsets.only(left: 15, right: 15, bottom: 15),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(15),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.3), // Shadow color
-                    spreadRadius: 3,
-                    blurRadius: 7,
-                    offset: Offset(0, 3), // Shadow position
-                  ),
-                ],
-              ),
-              padding: const EdgeInsets.all(
-                  15.0), // Padding inside the small container
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Image Section
-                  Container(
-                    width: 100, // Smaller width for the image
-                    height: 100, // Smaller height for the image
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      image: DecorationImage(
-                        image: AssetImage(
-                            'assets/kos3.png'), // Replace with your kost image
-                        fit:
-                            BoxFit.cover, // Ensure the image fits the container
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 15), // Space between image and text
-                  // Detail Section
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                'Kost Dekat UNIMAL',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ),
-                            IconButton(
-                              icon: Icon(Icons.favorite, color: Colors.red),
-                              iconSize: 20,
-                              onPressed: () {
-                                // Tambahkan aksi yang diinginkan ketika tombol ditekan
-                                print('Favorit ditekan');
-                              },
-                            ),
-                          ],
-                        ), // Space between elements
-                        Row(
-                          children: [
-                            Icon(Icons.calendar_today,
-                                size: 23, color: Colors.blue),
-                            SizedBox(width: 5),
-                            Text('9/8/2024 - 9/8/2025'),
-                          ],
-                        ),
-                        SizedBox(height: 10), // Space between elements
-                        Row(
-                          children: [
-                            Icon(Icons.location_on_outlined,
-                                size: 23, color: Colors.blue),
-                            SizedBox(width: 5),
-                            Text('Jl. Bukit Indah'),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
+        );
+      }
+    },
+  );
+}
+
 }

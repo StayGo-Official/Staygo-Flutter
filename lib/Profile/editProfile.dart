@@ -2,19 +2,52 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:staygo/repository.dart';
+import 'package:staygo/constants.dart';
 
 class EditProfile extends StatefulWidget {
-  const EditProfile({super.key});
+  final String username;
+  final String nama;
+  final String email;
+  final String noHp;
+  final String alamat;
+  final String ttl;
+  final String image;
+  final String accessToken;
+  final int customerId;
+  final Function(Map<String, dynamic>) onProfileUpdated;
+
+  const EditProfile({
+    Key? key,
+    required this.username,
+    required this.nama,
+    required this.email,
+    required this.noHp,
+    required this.alamat,
+    required this.ttl,
+    required this.image,
+    required this.accessToken,
+    required this.customerId,
+    required this.onProfileUpdated,
+  }) : super(key: key);
 
   @override
   State<EditProfile> createState() => _EditProfileState();
 }
 
 class _EditProfileState extends State<EditProfile> {
-  TextEditingController _dateController = TextEditingController();
+  final CustomerRepository _repository = CustomerRepository();
+
+  // Kontroller untuk form
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _addressController = TextEditingController();
+  final _dateController = TextEditingController();
 
   File? _image; // Variabel untuk menyimpan gambar yang dipilih
   final _picker = ImagePicker(); // Inisialisasi ImagePicker
+  bool _isLoading = false;
 
   Future<void> _selectDate(BuildContext context) async {
     DateTime? selectedDate = await showDatePicker(
@@ -32,8 +65,8 @@ class _EditProfileState extends State<EditProfile> {
   }
 
   Future<void> _getImage() async {
-    final pickedFile = await _picker.pickImage(
-        source: ImageSource.gallery, imageQuality: 80);
+    final pickedFile =
+        await _picker.pickImage(source: ImageSource.gallery, imageQuality: 80);
 
     if (pickedFile != null) {
       setState(() {
@@ -42,6 +75,102 @@ class _EditProfileState extends State<EditProfile> {
     } else {
       print('No image selected');
     }
+  }
+
+  bool _validateInputs() {
+    if (_nameController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Nama tidak boleh kosong')),
+      );
+      return false;
+    }
+    if (_emailController.text.isEmpty || !_emailController.text.contains('@')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Email tidak valid')),
+      );
+      return false;
+    }
+    if (_phoneController.text.isEmpty || _phoneController.text.length < 10) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Nomor HP tidak valid')),
+      );
+      return false;
+    }
+    if (_addressController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Alamat tidak boleh kosong')),
+      );
+      return false;
+    }
+    if (_dateController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Tanggal lahir tidak boleh kosong')),
+      );
+      return false;
+    }
+    return true;
+  }
+
+  Future<void> _saveProfile() async {
+    if (!_validateInputs()) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    final profileData = {
+      'nama': _nameController.text.trim(),
+      'email': _emailController.text.trim(),
+      'noHp': _phoneController.text.trim(),
+      'alamat': _addressController.text.trim(),
+      'ttl': _dateController.text.trim(),
+    };
+
+    final response = await _repository.updateCustomerProfile(
+      accessToken: widget.accessToken,
+      customerId: widget.customerId,
+      profileData: profileData,
+      imageFile: _image,
+    );
+
+    if (response['status']) {
+      final updatedImagePath = response['imagePath'];
+      final updatedProfile = {
+        ...profileData,
+        'image': updatedImagePath,
+      };
+
+      widget.onProfileUpdated(updatedProfile);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(response['message'])),
+      );
+      Navigator.pop(context); // Navigate back to profile page
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(response['message'] ?? 'Update failed')),
+      );
+    }
+
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
+  String? updatedImage;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Inisialisasi data awal
+    _nameController.text = widget.nama;
+    _emailController.text = widget.email;
+    _phoneController.text = widget.noHp;
+    _addressController.text = widget.alamat;
+    _dateController.text = widget.ttl;
+    updatedImage =
+        widget.image; // Pastikan updatedImage dimuat dari widget.image
   }
 
   @override
@@ -79,8 +208,13 @@ class _EditProfileState extends State<EditProfile> {
                 child: CircleAvatar(
                   radius: 50,
                   backgroundImage: _image != null
-                      ? FileImage(_image!) as ImageProvider
-                      : AssetImage('assets/profile.png'),
+                      ? FileImage(_image!) // Jika ada file gambar yang dipilih
+                      : (updatedImage != null && updatedImage!.isNotEmpty
+                          ? (updatedImage!.contains(AppConstants.baseUrlImage)
+                              ? NetworkImage(updatedImage!) // URL lengkap
+                              : NetworkImage(
+                                  '${AppConstants.baseUrlImage}$updatedImage')) // Tambahkan base URL jika belum lengkap
+                          : AssetImage('assets/profile.png')) as ImageProvider,
                   child: _image == null
                       ? Icon(
                           Icons.camera_alt,
@@ -122,6 +256,7 @@ class _EditProfileState extends State<EditProfile> {
                     SizedBox(width: 10), // Padding antara icon dan TextField
                     Expanded(
                       child: TextField(
+                        controller: _nameController,
                         decoration: InputDecoration(
                           border: UnderlineInputBorder(),
                           enabledBorder: UnderlineInputBorder(
@@ -151,6 +286,7 @@ class _EditProfileState extends State<EditProfile> {
                     SizedBox(width: 10), // Padding antara icon dan TextField
                     Expanded(
                       child: TextField(
+                        controller: _phoneController,
                         decoration: InputDecoration(
                           border: UnderlineInputBorder(),
                           enabledBorder: UnderlineInputBorder(
@@ -180,6 +316,7 @@ class _EditProfileState extends State<EditProfile> {
                     SizedBox(width: 10), // Padding antara icon dan TextField
                     Expanded(
                       child: TextField(
+                        controller: _emailController,
                         decoration: InputDecoration(
                           border: UnderlineInputBorder(),
                           enabledBorder: UnderlineInputBorder(
@@ -211,6 +348,7 @@ class _EditProfileState extends State<EditProfile> {
                     SizedBox(width: 10), // Padding antara icon dan TextField
                     Expanded(
                       child: TextField(
+                        controller: _addressController,
                         decoration: InputDecoration(
                           border: UnderlineInputBorder(),
                           enabledBorder: UnderlineInputBorder(
@@ -271,9 +409,7 @@ class _EditProfileState extends State<EditProfile> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 25.0),
                 child: GestureDetector(
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
+                  onTap: _isLoading ? null : _saveProfile,
                   child: Container(
                     padding: EdgeInsets.all(15),
                     decoration: BoxDecoration(
@@ -281,13 +417,15 @@ class _EditProfileState extends State<EditProfile> {
                       borderRadius: BorderRadius.circular(50),
                     ),
                     child: Center(
-                      child: Text(
-                        'Simpan',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 15,
-                        ),
-                      ),
+                      child: _isLoading
+                          ? CircularProgressIndicator(color: Colors.white)
+                          : Text(
+                              'Simpan',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 15,
+                              ),
+                            ),
                     ),
                   ),
                 ),
