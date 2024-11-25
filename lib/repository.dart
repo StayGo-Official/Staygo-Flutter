@@ -227,4 +227,99 @@ class FavoriteKostRepository {
       throw Exception('Error fetching favorite kost');
     }
   }
+
+  Future<Map<String, dynamic>> addFavorite({
+    required String accessToken,
+    required int kostId,
+  }) async {
+    final url = Uri.parse('$endpoint/favorite-kost');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+        body: jsonEncode({'kostId': kostId}),
+      );
+
+      // Decode respons backend
+      final Map<String, dynamic> decodedResponse = jsonDecode(response.body);
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        // Return respons jika sukses
+        return decodedResponse;
+      } else {
+        // Jika gagal, kembalikan respons backend dengan status false
+        return {
+          'status': false,
+          'message': decodedResponse['message'] ?? 'Gagal menambahkan favorit',
+        };
+      }
+    } catch (error) {
+      // Tangani error lain
+      throw Exception('Error adding favorite: $error');
+    }
+  }
+
+  Future<Map<String, dynamic>> checkIfFavorite({
+    required String accessToken,
+    required int kostId,
+  }) async {
+    final url = Uri.parse(
+        '$endpoint/favorite-kost/check/$kostId'); // Pastikan endpoint sesuai dengan backend
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      // Parsing respons backend
+      final Map<String, dynamic> decodedResponse = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        // Jika respons berhasil
+        return decodedResponse;
+      } else {
+        // Jika gagal, return status false
+        return {
+          'status': false,
+          'message':
+              decodedResponse['message'] ?? 'Gagal memeriksa status favorit',
+        };
+      }
+    } catch (error) {
+      // Tangani error lain
+      throw Exception('Error checking favorite status: $error');
+    }
+  }
+
+  Future<Map<String, dynamic>> deleteFavorite({
+    required String accessToken,
+    required int favoriteId,
+  }) async {
+    final url = Uri.parse('$endpoint/favorite-kost/$favoriteId');
+
+    try {
+      final response = await http.delete(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        throw Exception('Failed to delete favorite');
+      }
+    } catch (error) {
+      throw Exception('Error deleting favorite: $error');
+    }
+  }
+  
 }

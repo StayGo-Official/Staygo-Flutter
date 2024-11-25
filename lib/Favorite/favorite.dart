@@ -34,6 +34,65 @@ class _FavoritePageState extends State<FavoritePage> {
     {'name': 'Irvan', 'gender': 'Cowok', 'image': 'assets/kos2.png'},
   ];
 
+  Future<void> deleteFavoriteItem({
+    required BuildContext context,
+    required String accessToken,
+    required int favoriteId,
+    required String kostName,
+    required List<dynamic> favoriteKostList,
+    required int index,
+  }) async {
+    // Tampilkan dialog konfirmasi
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Hapus Favorit'),
+        content:
+            Text('Apakah Anda yakin ingin menghapus "$kostName" dari favorit?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false), // Batal
+            child: Text('Batal'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true), // Hapus
+            child: Text('Hapus'),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldDelete == true) {
+      try {
+        // Panggil fungsi repository untuk menghapus favorit
+        final response = await favoriteRepo.deleteFavorite(
+          accessToken: accessToken,
+          favoriteId: favoriteId,
+        );
+
+        if (response['status'] == true) {
+          // Hapus item dari UI
+          favoriteKostList.removeAt(index);
+          setState(() {});
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Favorit berhasil dihapus!')),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content:
+                    Text(response['message'] ?? 'Gagal menghapus favorit')),
+          );
+        }
+      } catch (error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $error')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -262,136 +321,179 @@ class _FavoritePageState extends State<FavoritePage> {
   }
 
   Widget buildKostSection() {
-  return FutureBuilder<List<dynamic>>(
-    future: _favoriteKost, // Use the fetched favorite kost data
-    builder: (context, snapshot) {
-      if (snapshot.connectionState == ConnectionState.waiting) {
-        return const Center(child: CircularProgressIndicator());
-      } else if (snapshot.hasError) {
-        return Center(child: Text('Error: ${snapshot.error}'));
-      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-        return const Center(child: Text('No favorite kost found'));
-      } else {
-        final favoriteKostList = snapshot.data!;
-        return ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: favoriteKostList.length,
-          itemBuilder: (context, index) {
-            final kost = favoriteKostList[index]['kost']; // Access kost data
-            return GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => DetailKost(),
-                  ),
-                );
-              },
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(15),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.3), // Shadow color
-                        spreadRadius: 3,
-                        blurRadius: 7,
-                        offset: const Offset(0, 3), // Shadow position
+    return FutureBuilder<List<dynamic>>(
+      future: _favoriteKost, // Use the fetched favorite kost data
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return const Center(child: Text('No favorite kost found'));
+        } else {
+          final favoriteKostList = snapshot.data!;
+          return ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: favoriteKostList.length,
+            itemBuilder: (context, index) {
+              final kost = favoriteKostList[index]['kost']; // Access kost data
+              return GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => DetailKost(
+                        accessToken: widget.accessToken,
+                        kostId: kost['id'],
                       ),
-                    ],
-                  ),
-                  padding: const EdgeInsets.all(15), // Padding inside the container
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Image Section
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: Image.network(
-                          AppConstants.baseUrlImage + kost['images'][0], // First image from the URL array
-                          height: 100,
-                          width: 100,
-                          fit: BoxFit.cover,
+                      settings: RouteSettings(arguments: kost),
+                    ),
+                  );
+                },
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(15),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.3), // Shadow color
+                          spreadRadius: 3,
+                          blurRadius: 7,
+                          offset: const Offset(0, 3), // Shadow position
                         ),
-                      ),
-                      const SizedBox(width: 15), // Space between image and text
-                      // Detail Section
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    kost['namaKost'],
-                                    style: const TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black,
+                      ],
+                    ),
+                    padding: const EdgeInsets.all(
+                        15), // Padding inside the container
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Image Section
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Image.network(
+                            AppConstants.baseUrlImage +
+                                kost['images']
+                                    [0], // First image from the URL array
+                            height: 100,
+                            width: 100,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        const SizedBox(
+                            width: 15), // Space between image and text
+                        // Detail Section
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      kost['namaKost'],
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black,
+                                      ),
+                                      overflow: TextOverflow
+                                          .ellipsis, // Prevent overflow
                                     ),
-                                    overflow: TextOverflow.ellipsis, // Prevent overflow
                                   ),
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.favorite, color: Colors.red),
-                                  iconSize: 20,
-                                  onPressed: () {
-                                    // Add favorite button action if needed
-                                    print('Favorite tapped');
-                                  },
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 5),
-                            Row(
-                              children: [
-                                const Icon(Icons.location_on_outlined,
-                                    size: 18, color: Colors.blue),
-                                const SizedBox(width: 5),
-                                Expanded(
-                                  child: Text(
-                                    kost['alamat'],
+                                  Row(
+                                    mainAxisSize: MainAxisSize
+                                        .min, // Row hanya selebar isi
+                                    children: [
+                                      // Icon Favorite Button
+                                      GestureDetector(
+                                        onTap: () {
+                                          print('Favorite tapped');
+                                        },
+                                        child: const Icon(
+                                          Icons.favorite,
+                                          color: Colors.red,
+                                          size: 24, // Ukuran ikon
+                                        ),
+                                      ),
+                                      SizedBox(width: 5),
+                                      // Icon Trash Button
+                                      GestureDetector(
+                                        onTap: () {
+                                          final favoriteId =
+                                              favoriteKostList[index]['id'];
+                                          final kostName = kost['namaKost'];
+
+                                          // Panggil fungsi deleteFavoriteItem
+                                          deleteFavoriteItem(
+                                            context: context,
+                                            accessToken: widget.accessToken,
+                                            favoriteId: favoriteId,
+                                            kostName: kostName,
+                                            favoriteKostList: favoriteKostList,
+                                            index: index,
+                                          );
+                                        },
+                                        child: const Icon(
+                                          Icons.delete,
+                                          color: Colors.blue,
+                                          size: 24, // Ukuran ikon
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 5),
+                              Row(
+                                children: [
+                                  const Icon(Icons.location_on_outlined,
+                                      size: 18, color: Colors.blue),
+                                  const SizedBox(width: 5),
+                                  Expanded(
+                                    child: Text(
+                                      kost['alamat'],
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.grey,
+                                      ),
+                                      overflow: TextOverflow
+                                          .ellipsis, // Prevent overflow
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 5),
+                              Row(
+                                children: [
+                                  const Icon(Icons.price_change_outlined,
+                                      size: 18, color: Colors.green),
+                                  const SizedBox(width: 5),
+                                  Text(
+                                    'Rp${kost['hargaPerbulan']}/bulan',
                                     style: const TextStyle(
                                       fontSize: 14,
-                                      color: Colors.grey,
+                                      color: Colors.black,
                                     ),
-                                    overflow: TextOverflow.ellipsis, // Prevent overflow
                                   ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 5),
-                            Row(
-                              children: [
-                                const Icon(Icons.price_change_outlined,
-                                    size: 18, color: Colors.green),
-                                const SizedBox(width: 5),
-                                Text(
-                                  'Rp${kost['hargaPerbulan']}/bulan',
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            );
-          },
-        );
-      }
-    },
-  );
-}
-
+              );
+            },
+          );
+        }
+      },
+    );
+  }
 }

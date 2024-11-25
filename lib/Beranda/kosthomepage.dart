@@ -21,10 +21,37 @@ class kostHomepage extends StatefulWidget {
 class _kostHomepageState extends State<kostHomepage> {
   late Future<List<Kost>> kostList;
 
+  String searchQuery = '';
+  List<Kost> originalKostList = [];
+  List<Kost> filteredKostList = [];
+
+  void filterKostList(String query) {
+    setState(() {
+      searchQuery = query.toLowerCase();
+      if (searchQuery.isEmpty) {
+        filteredKostList = originalKostList; // Kembalikan data asli
+      } else {
+        filteredKostList = originalKostList.where((kost) {
+          return kost.namaKost.toLowerCase().contains(searchQuery);
+        }).toList();
+      }
+    });
+  }
+
   @override
   void initState() {
     super.initState();
-    kostList = RepositoryKost().getDataKost();
+    if (widget.accessToken.isEmpty) {
+      Navigator.pushReplacementNamed(context, '/login');
+    } else {
+      kostList = RepositoryKost().getDataKost();
+      kostList.then((data) {
+        setState(() {
+          originalKostList = data; // Simpan data asli
+          filteredKostList = data; // Inisialisasi data yang akan ditampilkan
+        });
+      });
+    }
   }
 
   @override
@@ -144,6 +171,7 @@ class _kostHomepageState extends State<kostHomepage> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: TextField(
+                      onChanged: filterKostList,
                       decoration: InputDecoration(
                         prefixIcon: Icon(Icons.search),
                         hintText: 'Cari kost anda',
@@ -277,133 +305,119 @@ class _kostHomepageState extends State<kostHomepage> {
 
             // Horizontal Carousel for Recommended Kost
             Container(
-              height: 280, // Height of the carousel
-              child: FutureBuilder<List<Kost>>(
-                future: kostList,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
-                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return Center(child: Text('Tidak ada data kost'));
-                  }
+              height: 280,
+              child: filteredKostList.isEmpty
+                  ? Center(
+                      child:
+                          Text('Tidak ada kost yang sesuai dengan pencarian'),
+                    )
+                  : ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: filteredKostList.length,
+                      itemBuilder: (context, index) {
+                        final Kost kost = filteredKostList[index];
 
-                  final kostListData = snapshot.data!;
-
-                  return ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: kostListData.length,
-                    itemBuilder: (context, index) {
-                      final Kost kost = kostListData[index];
-
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.of(context).popAndPushNamed(
-                            '/detail-kost',
-                            arguments: {
-                              'namaKost': kost.namaKost,
-                              'hargaPerbulan': kost.hargaPerbulan,
-                              'hargaPertahun': kost.hargaPertahun,
-                              'tersedia': kost.tersedia,
-                              'gender': kost.gender,
-                              'fasilitas': kost.fasilitas,
-                              'deskripsi': kost.deskripsi,
-                              'alamat': kost.alamat,
-                              'latitude': kost.latitude,
-                              'longitude': kost.longitude,
-                              'images': kost.images,
-                            },
-                          );
-                        },
-                        child: Container(
-                          width: 160,
-                          margin: EdgeInsets.all(10), // Margin between items
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(15),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.3),
-                                spreadRadius: 3,
-                                blurRadius: 7,
-                                offset: Offset(0, 3), // Shadow position
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Kost Image
-                              ClipRRect(
-                                borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(15),
-                                  topRight: Radius.circular(15),
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.of(context).pushNamed(
+                              '/detail-kost',
+                              arguments: {
+                                'namaKost': kost.namaKost,
+                                'hargaPerbulan': kost.hargaPerbulan,
+                                'hargaPertahun': kost.hargaPertahun,
+                                'tersedia': kost.tersedia,
+                                'gender': kost.gender,
+                                'fasilitas': kost.fasilitas,
+                                'deskripsi': kost.deskripsi,
+                                'alamat': kost.alamat,
+                                'latitude': kost.latitude,
+                                'longitude': kost.longitude,
+                                'images': kost.images,
+                                'accessToken': widget.accessToken,
+                                'kostId': kost.id,
+                              },
+                            );
+                          },
+                          child: Container(
+                            width: 160,
+                            margin: EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(15),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.3),
+                                  spreadRadius: 3,
+                                  blurRadius: 7,
+                                  offset: Offset(0, 3),
                                 ),
-                                child: Image.network(
-                                  AppConstants.baseUrlImage +
-                                      kost.images.first, // Cast to String
-                                  width: 160,
-                                  height: 150,
-                                  fit: BoxFit.cover,
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(15),
+                                    topRight: Radius.circular(15),
+                                  ),
+                                  child: Image.network(
+                                    AppConstants.baseUrlImage +
+                                        kost.images.first,
+                                    width: 160,
+                                    height: 150,
+                                    fit: BoxFit.cover,
+                                  ),
                                 ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(10.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      kost.namaKost as String, // Cast to String
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    SizedBox(height: 5),
-                                    Row(
-                                      children: [
-                                        Icon(Icons.location_on_outlined,
-                                            size: 16, color: Colors.blue),
-                                        SizedBox(width: 5),
-                                        Expanded(
-                                          // Tambahkan Expanded di sekitar Text untuk membatasi area teks
-                                          child: Text(
-                                            kost.alamat
-                                                as String, // Cast to String
-                                            style: TextStyle(fontSize: 12),
-                                            maxLines:
-                                                1, // Batasi teks menjadi satu baris
-                                            overflow: TextOverflow
-                                                .ellipsis, // Tampilkan ... jika teks terlalu panjang
-                                          ),
+                                Padding(
+                                  padding: const EdgeInsets.all(10.0),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        kost.namaKost,
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold,
                                         ),
-                                      ],
-                                    ),
-                                    SizedBox(height: 5),
-                                    Text(
-                                      "Rp. " +
-                                          kost.hargaPertahun.toString() +
-                                          " /tahun", // Cast to String
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.green,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
                                       ),
-                                    ),
-                                  ],
+                                      SizedBox(height: 5),
+                                      Row(
+                                        children: [
+                                          Icon(Icons.location_on_outlined,
+                                              size: 16, color: Colors.blue),
+                                          SizedBox(width: 5),
+                                          Expanded(
+                                            child: Text(
+                                              kost.alamat,
+                                              style: TextStyle(fontSize: 12),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(height: 5),
+                                      Text(
+                                        "Rp. ${kost.hargaPertahun} /tahun",
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.green,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
+                        );
+                      },
+                    ),
             ),
           ],
         ),

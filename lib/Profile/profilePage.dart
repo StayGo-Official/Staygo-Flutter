@@ -8,6 +8,7 @@ import 'package:staygo/loginpage.dart';
 import 'package:staygo/navigationBottom.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:staygo/repository.dart';
+import 'package:staygo/constants.dart';
 
 class Profilepage extends StatefulWidget {
   final String username;
@@ -161,8 +162,8 @@ class _ProfilepageState extends State<Profilepage> {
                       children: [
                         CircleAvatar(
                           radius: 40, // Radius of the avatar
-                          backgroundImage: AssetImage(
-                              'assets/profile.png'), // Your profile image
+                          backgroundImage: NetworkImage(
+                              AppConstants.baseUrlImage + image), // Your profile image
                         ),
                         SizedBox(
                             width:
@@ -172,7 +173,7 @@ class _ProfilepageState extends State<Profilepage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                username,
+                                nama,
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,

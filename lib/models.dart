@@ -237,3 +237,20 @@ class CustomerRegistration {
     };
   }
 }
+
+class DeleteFavoriteResponse {
+  final bool status;
+  final String message;
+
+  DeleteFavoriteResponse({
+    required this.status,
+    required this.message,
+  });
+
+  factory DeleteFavoriteResponse.fromJson(Map<String, dynamic> json) {
+    return DeleteFavoriteResponse(
+      status: json['status'],
+      message: json['message'],
+    );
+  }
+}

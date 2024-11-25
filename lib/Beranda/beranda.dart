@@ -162,7 +162,7 @@ class BerandaPage extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                           builder: (context) {
-                            return kostHomepage(username: username, accessToken: accessToken,);
+                            return kostHomepage(username: username, accessToken: accessToken);
                           },
                         ),
                       );

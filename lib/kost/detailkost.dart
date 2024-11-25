@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, sort_child_properties_last, sized_box_for_whitespace
 
 import 'package:flutter/material.dart';
+import 'package:staygo/repository.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:staygo/constants.dart';
 
@@ -8,13 +9,102 @@ final Uri _whatsappUrl = Uri.parse(
     'https://api.whatsapp.com/send?phone=6281360903248&text=Halo%20saya%20mau%20bertanya%20tentang%20Kamar%20Kost%20nya');
 
 class DetailKost extends StatefulWidget {
-  const DetailKost({super.key});
+  final String accessToken;
+  final int kostId;
+
+  DetailKost({
+    required this.accessToken,
+    required this.kostId,
+    Key? key,
+  }) : super(key: key) {
+    if (accessToken.isEmpty) {
+      throw Exception('Access token is required');
+    }
+  }
 
   @override
   State<DetailKost> createState() => _DetailKostState();
 }
 
 class _DetailKostState extends State<DetailKost> {
+  bool isFavorite = false;
+  bool isLoading = false;
+
+  final FavoriteKostRepository _repository = FavoriteKostRepository();
+
+  Future<void> _addToFavorite() async {
+    setState(() {
+      isLoading = true; // Tampilkan indikator loading
+    });
+
+    try {
+      // Panggil fungsi repository
+      final response = await _repository.addFavorite(
+        accessToken: widget.accessToken,
+        kostId: widget.kostId,
+      );
+
+      if (response['status'] == true) {
+        // Jika berhasil, set status isFavorite menjadi true
+        setState(() {
+          isFavorite = true;
+        });
+
+        // Tampilkan pesan sukses
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(response['message']),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        // Jika gagal, tampilkan pesan error dari backend
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content:
+                Text(response['message'] ?? 'Gagal menambahkan ke favorit'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (error) {
+      // Tangani error yang tidak diantisipasi
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Terjadi kesalahan: ${error.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() {
+        isLoading = false; // Matikan indikator loading setelah selesai
+      });
+    }
+  }
+
+  Future<void> _checkIfFavorite() async {
+    try {
+      final response = await _repository.checkIfFavorite(
+        accessToken: widget.accessToken,
+        kostId: widget.kostId,
+      );
+
+      // Periksa respons API
+      if (response['status'] == true) {
+        setState(() {
+          isFavorite = true; // Jika sudah favorit, ubah status ke true
+        });
+      } else {
+        setState(() {
+          isFavorite = false; // Jika belum favorit, ubah status ke false
+        });
+      }
+    } catch (error) {
+      // Tangani error dengan mencetak ke konsol atau log
+      print('Error checking favorite status: $error');
+    }
+  }
+
   int _currentIndex =
       0; // For tracking the index of the current page in the PageView
 
@@ -35,17 +125,29 @@ class _DetailKostState extends State<DetailKost> {
   @override
   void initState() {
     super.initState();
+    _checkIfFavorite(); // Periksa status favorit saat halaman dimuat
   }
 
   @override
   Widget build(BuildContext context) {
-    final Map<String, dynamic> kostData =
-        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
+    final Map<String, dynamic>? kostData =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
 
-    List<String> imageUrls = kostData['images']
-        .map<String>((image) =>
-            AppConstants.baseUrlImage + image) // Gabungkan dengan baseUrlImage
-        .toList();
+    if (kostData == null) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text('Detail Kost'),
+        ),
+        body: Center(
+          child: Text('Data kost tidak tersedia'),
+        ),
+      );
+    }
+
+    List<String> imageUrls = (kostData['images'] as List<dynamic>?)
+            ?.map((image) => AppConstants.baseUrlImage + image.toString())
+            .toList() ??
+        [];
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -402,25 +504,54 @@ class _DetailKostState extends State<DetailKost> {
       ),
 
       floatingActionButton: Padding(
-        padding: const EdgeInsets.symmetric(
-            horizontal: 16.0), // Adjust padding if needed
-        child: SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: _launchWhatsApp,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Color(0xFF06283D), // Same color as given
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(50), // Rounded corners
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Expanded(
+              child: SizedBox(
+                child: ElevatedButton(
+                  onPressed: _launchWhatsApp,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFF06283D), // Warna tombol
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(50), // Sudut membulat
+                    ),
+                    padding: EdgeInsets.symmetric(
+                        vertical: 15), // Tinggi tombol "Pesan Kost"
+                  ),
+                  child: Text(
+                    'Pesan Kost',
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                ),
               ),
-              padding:
-                  EdgeInsets.symmetric(vertical: 15), // Height of the button
             ),
-            child: Text(
-              'Pesan Kost',
-              style: TextStyle(color: Colors.white, fontSize: 16),
+            SizedBox(width: 10), // Spasi antara tombol
+            FloatingActionButton(
+              onPressed: isLoading
+                  ? null
+                  : _addToFavorite, // Panggil fungsi tambah favorit
+              backgroundColor: Colors.white, // Warna tombol favorit
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(50), // Sudut membulat
+              ),
+              child: isLoading
+                  ? CircularProgressIndicator(
+                      color: Colors
+                          .red, // Indikator loading jika proses sedang berjalan
+                    )
+                  : Icon(
+                      isFavorite
+                          ? Icons.favorite
+                          : Icons
+                              .favorite_border, // Ubah ikon berdasarkan status favorit
+                      color: isFavorite
+                          ? Colors.red
+                          : Colors.grey, // Warna sesuai status favorit
+                    ),
             ),
-          ),
+          ],
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,

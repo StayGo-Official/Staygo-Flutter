@@ -9,8 +9,7 @@ import 'package:staygo/repository.dart';
 class Ojekhomepage extends StatefulWidget {
   final String username;
 
-  const Ojekhomepage(
-      { Key? key, required this.username }) : super(key: key);
+  const Ojekhomepage({Key? key, required this.username}) : super(key: key);
 
   @override
   State<Ojekhomepage> createState() => _OjekhomepageState();
@@ -29,7 +28,6 @@ class _OjekhomepageState extends State<Ojekhomepage> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
@@ -195,134 +193,261 @@ class _OjekhomepageState extends State<Ojekhomepage> {
               height: 10,
             ),
             // Vertical Carousel using PageView
-            SizedBox(
-              height: 490, // Set height for the grid container
-              child: FutureBuilder<List<Ojek>>(
-                future: ojekList,
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-
-                    final ojekListData = snapshot.data!;
-
-                    return GridView.builder(
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2, // Two cards per row
-                        childAspectRatio: 0.75,
-                      ),
-                      itemCount: ojekListData.length, // Number of items
-                      itemBuilder: (context, index) {
-                        final Ojek ojek = ojekListData[index];
-
-                        return Padding(
-                          padding: const EdgeInsets.all(15.0),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: const Color.fromARGB(255, 109, 109, 109),
-                                width: 2,
-                              ), // Border color
-                              borderRadius:
-                                  BorderRadius.circular(15), // Rounded corners
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Stack(
-                                    children: [
-                                      ClipRRect(
-                                        borderRadius: BorderRadius.only(
-                                          topLeft: Radius.circular(13),
-                                          topRight: Radius.circular(13),
-                                          bottomLeft: Radius.circular(13),
-                                          bottomRight: Radius.circular(13),
-                                        ),
-                                        child: Image.network(
-                                          AppConstants.baseUrlImage +
-                                              ojek.images.first,
-                                          fit: BoxFit.cover,
-                                          height: 120,
-                                          width: double.infinity,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Flexible(
-                                        child: Text(
-                                          '${ojek.status ? 'Tersedia' : 'Tidak Tersedia'}\n${ojek.nama} (${ojek.gender})',
-                                          textAlign: TextAlign.left,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                            color: Color(0xFF06283D),
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                      ),
-                                      IconButton(
-                                        icon: Icon(Icons.favorite_border),
-                                        iconSize: 29.0,
-                                        onPressed: () {
-                                          // Action ketika icon favorite ditekan
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                  GestureDetector(
-                                    onTap: () {
-                                      Navigator.of(context).popAndPushNamed(
-                                        '/detail-ojek',
-                                        arguments: {
-                                          'id': ojek.id,
-                                          'nama': ojek.nama,
-                                          'alamat': ojek.alamat,
-                                          'status': ojek.status,
-                                          'gender': ojek.gender,
-                                          'images': ojek.images,
-                                        },
-                                      );
-                                    },
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      children: [
-                                        Icon(
-                                          Icons.info_outline,
-                                          size: 25.0,
-                                          color: Color(0xFF06283D),
-                                        ),
-                                        SizedBox(width: 8),
-                                        Text(
-                                          'Pesan Sekarang...',
-                                          style: TextStyle(
-                                            color: Color(0xFF06283D),
-                                            fontSize: 12,
-                                          ),
-                                          textAlign: TextAlign.left,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    );
-                  } else {
-                    return Center(child: CircularProgressIndicator());
-                  }
-                },
-              ),
-            ),
+            selectedOption == 'Ride' ? buildRideSection() : buildFoodSection(),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget buildRideSection() {
+    // Put your 'untuk Ojek' code here and return the widget
+    return SizedBox(
+      height: 490, // Set height for the grid container
+      child: FutureBuilder<List<Ojek>>(
+        future: ojekList,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            final ojekListData = snapshot.data!;
+
+            return GridView.builder(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2, // Two cards per row
+                childAspectRatio: 0.75,
+              ),
+              itemCount: ojekListData.length, // Number of items
+              itemBuilder: (context, index) {
+                final Ojek ojek = ojekListData[index];
+
+                return Padding(
+                  padding: const EdgeInsets.all(15.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: const Color.fromARGB(255, 109, 109, 109),
+                        width: 2,
+                      ), // Border color
+                      borderRadius:
+                          BorderRadius.circular(15), // Rounded corners
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Stack(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(13),
+                                  topRight: Radius.circular(13),
+                                  bottomLeft: Radius.circular(13),
+                                  bottomRight: Radius.circular(13),
+                                ),
+                                child: Image.network(
+                                  AppConstants.baseUrlImage + ojek.images.first,
+                                  fit: BoxFit.cover,
+                                  height: 120,
+                                  width: double.infinity,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  '${ojek.status ? 'Tersedia' : 'Tidak Tersedia'}\n${ojek.nama} (${ojek.gender})',
+                                  textAlign: TextAlign.left,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    color: Color(0xFF06283D),
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                              IconButton(
+                                icon: Icon(Icons.favorite_border),
+                                iconSize: 29.0,
+                                onPressed: () {
+                                  // Action ketika icon favorite ditekan
+                                },
+                              ),
+                            ],
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.of(context).popAndPushNamed(
+                                '/detail-ojek',
+                                arguments: {
+                                  'id': ojek.id,
+                                  'nama': ojek.nama,
+                                  'alamat': ojek.alamat,
+                                  'status': ojek.status,
+                                  'gender': ojek.gender,
+                                  'images': ojek.images,
+                                },
+                              );
+                            },
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Icon(
+                                  Icons.info_outline,
+                                  size: 25.0,
+                                  color: Color(0xFF06283D),
+                                ),
+                                SizedBox(width: 8),
+                                Text(
+                                  'Pesan Sekarang...',
+                                  style: TextStyle(
+                                    color: Color(0xFF06283D),
+                                    fontSize: 12,
+                                  ),
+                                  textAlign: TextAlign.left,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            );
+          } else {
+            return Center(child: CircularProgressIndicator());
+          }
+        },
+      ),
+    );
+  }
+
+  Widget buildFoodSection() {
+    // Put your 'untuk Ojek' code here and return the widget
+    return SizedBox(
+      height: 490, // Set height for the grid container
+      child: FutureBuilder<List<Ojek>>(
+        future: ojekList,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            final ojekListData = snapshot.data!;
+
+            return GridView.builder(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2, // Two cards per row
+                childAspectRatio: 0.75,
+              ),
+              itemCount: ojekListData.length, // Number of items
+              itemBuilder: (context, index) {
+                final Ojek ojek = ojekListData[index];
+
+                return Padding(
+                  padding: const EdgeInsets.all(15.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: const Color.fromARGB(255, 109, 109, 109),
+                        width: 2,
+                      ), // Border color
+                      borderRadius:
+                          BorderRadius.circular(15), // Rounded corners
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Stack(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(13),
+                                  topRight: Radius.circular(13),
+                                  bottomLeft: Radius.circular(13),
+                                  bottomRight: Radius.circular(13),
+                                ),
+                                child: Image.network(
+                                  AppConstants.baseUrlImage + ojek.images.first,
+                                  fit: BoxFit.cover,
+                                  height: 120,
+                                  width: double.infinity,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  '${ojek.status ? 'Tersedia Food' : 'Tidak Tersedia'}\n${ojek.nama} (${ojek.gender})',
+                                  textAlign: TextAlign.left,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    color: Color(0xFF06283D),
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                              IconButton(
+                                icon: Icon(Icons.favorite_border),
+                                iconSize: 29.0,
+                                onPressed: () {
+                                  // Action ketika icon favorite ditekan
+                                },
+                              ),
+                            ],
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.of(context).popAndPushNamed(
+                                '/detail-ojek',
+                                arguments: {
+                                  'id': ojek.id,
+                                  'nama': ojek.nama,
+                                  'alamat': ojek.alamat,
+                                  'status': ojek.status,
+                                  'gender': ojek.gender,
+                                  'images': ojek.images,
+                                },
+                              );
+                            },
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Icon(
+                                  Icons.info_outline,
+                                  size: 25.0,
+                                  color: Color(0xFF06283D),
+                                ),
+                                SizedBox(width: 8),
+                                Text(
+                                  'Pesan Sekarang...',
+                                  style: TextStyle(
+                                    color: Color(0xFF06283D),
+                                    fontSize: 12,
+                                  ),
+                                  textAlign: TextAlign.left,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            );
+          } else {
+            return Center(child: CircularProgressIndicator());
+          }
+        },
       ),
     );
   }
