@@ -17,22 +17,21 @@ class FavoritePage extends StatefulWidget {
 
 class _FavoritePageState extends State<FavoritePage> {
   final FavoriteKostRepository favoriteRepo = FavoriteKostRepository();
+  final FavoriteOjekRepository favoriteRepoOjek = FavoriteOjekRepository();
 
   late Future<List<dynamic>> _favoriteKost;
+  late Future<List<dynamic>> _favoriteOjek;
 
   @override
   void initState() {
     super.initState();
     _favoriteKost = favoriteRepo.fetchFavoriteKost(widget.accessToken);
+    _favoriteOjek = favoriteRepoOjek.fetchFavoriteOjek(widget.accessToken);
   }
 
   int _currentIndex = 0;
 
   String selectedOption = 'Ojek';
-
-  final List<Map<String, String>> items = [
-    {'name': 'Irvan', 'gender': 'Cowok', 'image': 'assets/kos2.png'},
-  ];
 
   Future<void> deleteFavoriteItem({
     required BuildContext context,
@@ -93,6 +92,65 @@ class _FavoritePageState extends State<FavoritePage> {
     }
   }
 
+  Future<void> deleteFavoriteOjekItem({
+    required BuildContext context,
+    required String accessToken,
+    required int favoriteId,
+    required String ojekName,
+    required List<dynamic> favoriteOjekList,
+    required int index,
+  }) async {
+    // Tampilkan dialog konfirmasi
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Hapus Favorit'),
+        content:
+            Text('Apakah Anda yakin ingin menghapus "$ojekName" dari favorit?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false), // Batal
+            child: Text('Batal'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true), // Hapus
+            child: Text('Hapus'),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldDelete == true) {
+      try {
+        // Panggil fungsi repository untuk menghapus favorit
+        final response = await favoriteRepoOjek.deleteFavorite(
+          accessToken: accessToken,
+          favoriteId: favoriteId,
+        );
+
+        if (response['status'] == true) {
+          // Hapus item dari UI
+          favoriteOjekList.removeAt(index);
+          setState(() {});
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Favorit berhasil dihapus!')),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content:
+                    Text(response['message'] ?? 'Gagal menghapus favorit')),
+          );
+        }
+      } catch (error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $error')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -105,15 +163,6 @@ class _FavoritePageState extends State<FavoritePage> {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: Colors.white,
-          ),
-          child: Transform.translate(
-            offset: Offset(4, 0),
-            child: IconButton(
-              icon: Icon(Icons.arrow_back_ios, color: Colors.black),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
           ),
         ),
         title: Text('Favorite'),
@@ -210,113 +259,145 @@ class _FavoritePageState extends State<FavoritePage> {
 
   Widget buildOjekSection() {
     // Put your 'untuk Ojek' code here and return the widget
-    return SizedBox(
-      height: 520,
-      child: GridView.builder(
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          childAspectRatio: 0.75,
-        ),
-        itemCount: items.length,
-        itemBuilder: (context, index) {
-          return Padding(
-            padding: const EdgeInsets.all(13.0),
-            child: Container(
-              decoration: BoxDecoration(
-                border: Border.all(
-                    color: const Color.fromARGB(255, 109, 109, 109),
-                    width: 2), // Border color
-                borderRadius: BorderRadius.circular(15), // Rounded corners
+    return FutureBuilder<List<dynamic>>(
+      future: _favoriteOjek, // Use the fetched favorite Ojek data
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return const Center(child: Text('No favorite kost found'));
+        } else {
+          final favoriteOjekList = snapshot.data!;
+          return SizedBox(
+            height: 520,
+            child: GridView.builder(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                childAspectRatio: 0.75,
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Stack(
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(13),
-                            topRight: Radius.circular(13),
-                            bottomLeft: Radius.circular(13),
-                            bottomRight: Radius.circular(13),
-                          ), // Sesuaikan dengan radius yang diinginkan
-                          child: Image.asset(
-                            items[index]['image']!,
-                            fit: BoxFit.cover,
-                            height: 120,
-                            width: double.infinity,
-                          ),
-                        ),
-                      ],
+              itemCount: favoriteOjekList.length,
+              itemBuilder: (context, index) {
+                final ojekData = favoriteOjekList[index]['ojek'];
+                return Padding(
+                  padding: const EdgeInsets.all(13.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                          color: const Color.fromARGB(255, 109, 109, 109),
+                          width: 2), // Border color
+                      borderRadius:
+                          BorderRadius.circular(15), // Rounded corners
                     ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Flexible(
-                          child: Text(
-                            'Tersedia\n${items[index]['name']} (${items[index]['gender']})',
-                            textAlign: TextAlign.left,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: Color(0xFF06283D),
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                        IconButton(
-                          icon: Icon(
-                            Icons.favorite,
-                            color: Colors.red,
-                          ),
-                          iconSize: 25.0,
-                          onPressed: () {
-                            // Action ketika icon favorite ditekan
-                          },
-                        ),
-                      ],
-                    ), // Memberikan sedikit ruang antara icon dan teks
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) {
-                              return Detailojek();
-                            },
-                          ),
-                        );
-                      },
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(
-                            Icons.info_outline,
-                            size: 25.0,
-                            color: Color(
-                                0xFF06283D), // Menyesuaikan warna icon jika diperlukan
+                          Stack(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(13),
+                                  topRight: Radius.circular(13),
+                                  bottomLeft: Radius.circular(13),
+                                  bottomRight: Radius.circular(13),
+                                ), // Sesuaikan dengan radius yang diinginkan
+                                child: Image.network(
+                                  AppConstants.baseUrlImage +
+                                      ojekData['images'][0],
+                                  fit: BoxFit.cover,
+                                  height: 120,
+                                  width: double.infinity,
+                                ),
+                              ),
+                            ],
                           ),
-                          SizedBox(width: 8),
-                          Text(
-                            'Pesan Sekarang...',
-                            style: TextStyle(
-                              color: Color(0xFF06283D),
-                              fontSize: 12,
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  'Tersedia\n${ojekData['nama']} (${ojekData['gender']})',
+                                  textAlign: TextAlign.left,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    color: Color(0xFF06283D),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                              IconButton(
+                                icon: Icon(
+                                  Icons.delete,
+                                  color: Colors.blue,
+                                ),
+                                iconSize: 25.0,
+                                onPressed: () {
+                                  final favoriteId =
+                                      favoriteOjekList[index]['id'];
+                                  final ojekName = ojekData['nama'];
+
+                                  // Panggil fungsi deleteFavoriteItem
+                                  deleteFavoriteOjekItem(
+                                    context: context,
+                                    accessToken: widget.accessToken,
+                                    favoriteId: favoriteId,
+                                    ojekName: ojekName,
+                                    favoriteOjekList: favoriteOjekList,
+                                    index: index,
+                                  );
+                                },
+                              ),
+                            ],
+                          ), // Memberikan sedikit ruang antara icon dan teks
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => Detailojek(
+                                    accessToken: widget.accessToken,
+                                    ojekId: ojekData['id'],
+                                  ),
+                                  settings: RouteSettings(arguments: ojekData),
+                                ),
+                              );
+                            },
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Icon(
+                                  Icons.info_outline,
+                                  size: 25.0,
+                                  color: Color(
+                                      0xFF06283D), // Menyesuaikan warna icon jika diperlukan
+                                ),
+                                SizedBox(width: 8),
+                                Text(
+                                  'Pesan Sekarang...',
+                                  style: TextStyle(
+                                    color: Color(0xFF06283D),
+                                    fontSize: 12,
+                                  ),
+                                  textAlign: TextAlign.left,
+                                ),
+                              ],
                             ),
-                            textAlign: TextAlign.left,
-                          ),
+                          )
                         ],
                       ),
-                    )
-                  ],
-                ),
-              ),
+                    ),
+                  ),
+                );
+              },
             ),
           );
-        },
-      ),
+        }
+        ;
+      },
     );
   }
 

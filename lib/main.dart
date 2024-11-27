@@ -40,7 +40,25 @@ class MyApp extends StatelessWidget {
             kostId: arguments['kostId'] as int,
           );
         },
-        "/detail-ojek": (context) => const Detailojek(),
+        
+        "/detail-ojek": (context) {
+          final Map<String, dynamic>? arguments = ModalRoute.of(context)
+              ?.settings
+              .arguments as Map<String, dynamic>?;
+
+          // Ensure arguments are not null
+          if (arguments == null ||
+              arguments['accessToken'] == null ||
+              arguments['ojekId'] == null) {
+            throw Exception(
+                'Missing required arguments: accessToken or ojekId');
+          }
+
+          return Detailojek(
+            accessToken: arguments['accessToken'] as String,
+            ojekId: arguments['ojekId'] as int,
+          );
+        },
       },
     );
   }

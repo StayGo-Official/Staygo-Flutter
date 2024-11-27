@@ -58,39 +58,50 @@ class Kost {
 
 class Ojek {
   String nama;
+  String namaLengkap;
   String alamat;
   bool status;
+  bool isRide;
+  bool isFood;
   String gender;
   List<String> images;
   List<String> url;
   String createdAt;
   int id;
+  bool isFavorite;
 
   Ojek({
     required this.nama,
+    required this.namaLengkap,
     required this.alamat,
     required this.status,
+    required this.isRide,
+    required this.isFood,
     required this.gender,
     required this.images,
     required this.url,
     required this.createdAt,
     required this.id,
+    required this.isFavorite,
   });
 
   factory Ojek.fromJson(Map<String, dynamic> json) {
     return Ojek(
       nama: json['nama'],
+      namaLengkap: json['namaLengkap'],
       alamat: json['alamat'],
       status: json['status'],
+      isRide: json['isRide'],
+      isFood: json['isFood'],
       gender: json['gender'],
       images: List<String>.from(json['images']),
       url: List<String>.from(json['url']),
       createdAt: json['createdAt'],
       id: json['id'],
+      isFavorite: json['isFavorite'],
     );
   }
 }
-
 
 // Model untuk User
 class User {
@@ -249,6 +260,23 @@ class DeleteFavoriteResponse {
 
   factory DeleteFavoriteResponse.fromJson(Map<String, dynamic> json) {
     return DeleteFavoriteResponse(
+      status: json['status'],
+      message: json['message'],
+    );
+  }
+}
+
+class ResetPasswordResponse {
+  final bool status;
+  final String message;
+
+  ResetPasswordResponse({
+    required this.status,
+    required this.message,
+  });
+
+  factory ResetPasswordResponse.fromJson(Map<String, dynamic> json) {
+    return ResetPasswordResponse(
       status: json['status'],
       message: json['message'],
     );

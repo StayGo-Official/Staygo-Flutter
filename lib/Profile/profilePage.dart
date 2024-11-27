@@ -40,25 +40,58 @@ class Profilepage extends StatefulWidget {
 
 class _ProfilepageState extends State<Profilepage> {
   // Variabel untuk menyimpan data profil yang bisa diperbarui
-  late String username;
-  late String nama;
-  late String email;
-  late String noHp;
-  late String alamat;
-  late String ttl;
-  late String image;
+  String username = '';
+  String nama = '';
+  String email = '';
+  String noHp = '';
+  String alamat = '';
+  String ttl = '';
+  String image = '';
+
+  bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    // Inisialisasi data dari widget
-    username = widget.username;
-    nama = widget.nama;
-    email = widget.email;
-    noHp = widget.noHp;
-    alamat = widget.alamat;
-    ttl = widget.ttl;
-    image = widget.image;
+    // Panggil API untuk mendapatkan data terbaru
+    _fetchProfile();
+  }
+
+  Future<void> _fetchProfile() async {
+    try {
+      final repository = CustomerRepository();
+      final response =
+          await repository.getProfile(widget.customerId, widget.accessToken);
+
+      if (response['status']) {
+        final data = response['data'];
+        setState(() {
+          username = data['username'] ?? '';
+          nama = data['nama'] ?? '';
+          email = data['email'] ?? '';
+          noHp = data['noHp'] ?? '';
+          alamat = data['alamat'] ?? '';
+          ttl = data['ttl'] ?? '';
+          image = data['image'] ?? ''; // URL gambar
+          isLoading = false;
+        });
+      } else {
+        // Handle error
+        setState(() {
+          isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(response['message'])),
+        );
+      }
+    } catch (error) {
+      setState(() {
+        isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error fetching profile: $error")),
+      );
+    }
   }
 
   void _launchPlayStore() async {
@@ -101,6 +134,12 @@ class _ProfilepageState extends State<Profilepage> {
 
   @override
   Widget build(BuildContext context) {
+    String profileImage = image.isEmpty ? 'profile.png' : image;
+
+    if (isLoading) {
+      return Center(child: CircularProgressIndicator());
+    }
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -111,15 +150,6 @@ class _ProfilepageState extends State<Profilepage> {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: Colors.white,
-          ),
-          child: Transform.translate(
-            offset: Offset(4, 0),
-            child: IconButton(
-              icon: Icon(Icons.arrow_back_ios, color: Colors.black),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
           ),
         ),
         title: Text('Profile'),
@@ -161,9 +191,11 @@ class _ProfilepageState extends State<Profilepage> {
                     child: Row(
                       children: [
                         CircleAvatar(
-                          radius: 40, // Radius of the avatar
-                          backgroundImage: NetworkImage(
-                              AppConstants.baseUrlImage + image), // Your profile image
+                          radius: 40,
+                          backgroundImage: image.isNotEmpty
+                              ? NetworkImage(AppConstants.baseUrlImage + image)
+                              : AssetImage('assets/profile.png')
+                                  as ImageProvider,
                         ),
                         SizedBox(
                             width:
@@ -179,6 +211,7 @@ class _ProfilepageState extends State<Profilepage> {
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
+                              Text('@' + username),
                               Text(email),
                               Text(noHp),
                             ],
@@ -348,7 +381,10 @@ class _ProfilepageState extends State<Profilepage> {
                   context,
                   MaterialPageRoute(
                     builder: (context) {
-                      return ResetPassword();
+                      return ResetPassword(
+                        accessToken: widget.accessToken,
+                        customerId: widget.customerId,
+                      );
                     },
                   ),
                 );

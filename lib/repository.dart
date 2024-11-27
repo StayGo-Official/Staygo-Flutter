@@ -31,15 +31,42 @@ class RepositoryKost {
 class RepositoryOjek {
   final endpoint = AppConstants.baseUrl;
 
-  Future<List<Ojek>> getDataOjek() async {
+  Future<List<Ojek>> getDataOjek({
+    required bool isRide,
+    required bool isFood,
+    required String accessToken, // Tambahkan accessToken
+  }) async {
     try {
-      final response = await http.get(Uri.parse(endpoint + '/ojek'));
+      // Sertakan token di header Authorization
+      final response = await http.get(
+        Uri.parse(endpoint + '/ojek-mobile'),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+      );
+
       if (response.statusCode == 200) {
         final List<dynamic> responseData = json.decode(response.body);
+
+        // Filter data berdasarkan isRide atau isFood
+        final filteredData = responseData.where((ojek) {
+          if (isRide) {
+            return ojek['isRide'] == true;
+          } else if (isFood) {
+            return ojek['isFood'] == true;
+          } else {
+            return false;
+          }
+        }).toList();
+
+        // Mengonversi filtered data menjadi list Ojek
         final List<Ojek> ojekList =
-            responseData.map((json) => Ojek.fromJson(json)).toList();
+            filteredData.map((json) => Ojek.fromJson(json)).toList();
 
         return ojekList;
+      } else if (response.statusCode == 401) {
+        throw Exception('Unauthorized: Please provide a valid token.');
       } else {
         throw Exception('Failed to fetch data');
       }
@@ -201,6 +228,79 @@ class CustomerRepository {
       };
     }
   }
+
+  Future<Map<String, dynamic>> getProfile(int customerId, String accessToken) async {
+    final url = Uri.parse("${AppConstants.baseUrl}/profile/$customerId");
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          "Authorization": "Bearer $accessToken",
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final responseBody = jsonDecode(response.body);
+        return {
+          'status': responseBody['status'],
+          'message': responseBody['message'],
+          'data': responseBody['data'],
+        };
+      } else {
+        final errorResponse = jsonDecode(response.body);
+        return {
+          'status': false,
+          'message': errorResponse['message'] ?? 'Gagal mengambil data profil',
+        };
+      }
+    } catch (error) {
+      throw Exception("Error fetching profile: $error");
+    }
+  }
+
+  Future<ResetPasswordResponse> resetPassword({
+    required String accessToken,
+    required int customerId,
+    required String currentPassword,
+    required String newPassword,
+    required String confirmPassword,
+  }) async {
+    final url = Uri.parse("${AppConstants.baseUrl}/change-password/$customerId");
+
+    try {
+      final body = jsonEncode({
+        "currentPassword": currentPassword,
+        "newPassword": newPassword,
+        "confirmPassword": confirmPassword,
+      });
+
+      final headers = {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $accessToken",
+      };
+
+      final response = await http.patch(url, headers: headers, body: body);
+
+      if (response.statusCode == 200) {
+        // Password reset successful
+        return ResetPasswordResponse.fromJson(jsonDecode(response.body));
+      } else {
+        // Password reset failed
+        final errorResponse = jsonDecode(response.body);
+        return ResetPasswordResponse(
+          status: false,
+          message: errorResponse['message'] ?? 'Password reset failed',
+        );
+      }
+    } catch (error) {
+      // Handle error
+      return ResetPasswordResponse(
+        status: false,
+        message: 'Error: $error',
+      );
+    }
+  }
 }
 
 class FavoriteKostRepository {
@@ -303,6 +403,92 @@ class FavoriteKostRepository {
     required int favoriteId,
   }) async {
     final url = Uri.parse('$endpoint/favorite-kost/$favoriteId');
+
+    try {
+      final response = await http.delete(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        throw Exception('Failed to delete favorite');
+      }
+    } catch (error) {
+      throw Exception('Error deleting favorite: $error');
+    }
+  }
+  
+}
+
+class FavoriteOjekRepository {
+  final endpoint = AppConstants.baseUrl;
+
+  // Fetch Favorite Ojek
+  Future<List<dynamic>> fetchFavoriteOjek(String accessToken) async {
+    final url = Uri.parse('$endpoint/favorite-ojek');
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body); // Return the parsed JSON response
+      } else {
+        throw Exception('Failed to load favorite ojek');
+      }
+    } catch (error) {
+      print('Error fetching favorite ojek: $error');
+      throw Exception('Error fetching favorite ojek');
+    }
+  }
+
+  Future<Map<String, dynamic>> addFavorite({
+    required String accessToken,
+    required int ojekId,
+  }) async {
+    final url = Uri.parse('$endpoint/favorite-ojek');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+        body: jsonEncode({'ojekId': ojekId}),
+      );
+
+      // Decode respons backend
+      final Map<String, dynamic> decodedResponse = jsonDecode(response.body);
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        // Return respons jika sukses
+        return decodedResponse;
+      } else {
+        // Jika gagal, kembalikan respons backend dengan status false
+        return {
+          'status': false,
+          'message': decodedResponse['message'] ?? 'Gagal menambahkan favorit',
+        };
+      }
+    } catch (error) {
+      // Tangani error lain
+      throw Exception('Error adding favorite: $error');
+    }
+  }
+
+  Future<Map<String, dynamic>> deleteFavorite({
+    required String accessToken,
+    required int favoriteId,
+  }) async {
+    final url = Uri.parse('$endpoint/favorite-ojek/$favoriteId');
 
     try {
       final response = await http.delete(

@@ -36,15 +36,6 @@ class _HistoryPemesananState extends State<HistoryPemesanan> {
             shape: BoxShape.circle,
             color: Colors.white,
           ),
-          child: Transform.translate(
-            offset: Offset(4, 0),
-            child: IconButton(
-              icon: Icon(Icons.arrow_back_ios, color: Colors.black),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-          ),
         ),
         title: Text('History'),
         centerTitle: true,

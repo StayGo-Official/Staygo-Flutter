@@ -3,15 +3,84 @@
 import 'package:flutter/material.dart';
 import 'package:staygo/Beranda/kosthomepage.dart';
 import 'package:staygo/Beranda/ojekhomepage.dart';
+import 'package:staygo/constants.dart';
+import 'package:staygo/repository.dart';
 
-class BerandaPage extends StatelessWidget {
-  final String username;
+class BerandaPage extends StatefulWidget {
+  final String nama;
+  final int customerId;
   final String accessToken;
 
-  BerandaPage({required this.username, required this.accessToken});
+  const BerandaPage({
+    required this.nama,
+    required this.customerId,
+    required this.accessToken,
+  });
+
+  @override
+  State<BerandaPage> createState() => _BerandaPageState();
+}
+
+class _BerandaPageState extends State<BerandaPage> {
+  
+  String username = '';
+  String nama = '';
+  String email = '';
+  String noHp = '';
+  String alamat = '';
+  String ttl = '';
+  String image = '';
+
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    // Panggil API untuk mendapatkan data terbaru
+    _fetchProfile();
+  }
+
+  Future<void> _fetchProfile() async {
+    try {
+      final repository = CustomerRepository();
+      final response =
+          await repository.getProfile(widget.customerId, widget.accessToken);
+
+      if (response['status']) {
+        final data = response['data'];
+        setState(() {
+          username = data['username'] ?? '';
+          nama = data['nama'] ?? '';
+          email = data['email'] ?? '';
+          noHp = data['noHp'] ?? '';
+          alamat = data['alamat'] ?? '';
+          ttl = data['ttl'] ?? '';
+          image = data['image'] ?? ''; // URL gambar
+          isLoading = false;
+        });
+      } else {
+        // Handle error
+        setState(() {
+          isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(response['message'])),
+        );
+      }
+    } catch (error) {
+      setState(() {
+        isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error fetching profile: $error")),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    String profileImage = image.isEmpty ? 'profile.png' : image;
+
     return Column(
       children: [
         // Custom Header
@@ -35,7 +104,9 @@ class BerandaPage extends StatelessWidget {
                     // Profile Picture
                     CircleAvatar(
                       radius: 30, // Larger radius for bigger avatar
-                      backgroundImage: AssetImage('assets/profile.png'), // Replace with your profile image
+                      backgroundImage: NetworkImage(
+                        AppConstants.baseUrlImage + profileImage
+                      ), // Replace with your profile image
                     ),
                     SizedBox(width: 15), // Space between avatar and text
 
@@ -48,14 +119,14 @@ class BerandaPage extends StatelessWidget {
                           Row(
                             children: [
                               Text(
-                                'Halo, $username! ', // Replace with dynamic name if necessary
+                                'Halo, $nama! ', // Replace with dynamic name if necessary
                                 style: TextStyle(
-                                  fontSize: 20, // Larger font size
+                                  fontSize: 17, // Larger font size
                                   fontWeight: FontWeight.bold,
                                   color: Colors.black, // Text color inside white container
                                 ),
                               ),
-                              Text('👋', style: TextStyle(fontSize: 20)), // Wave emoji
+                              Text('👋', style: TextStyle(fontSize: 17)), // Wave emoji
                             ],
                           ),
                           SizedBox(height: 5), // Space between greeting and message
@@ -95,7 +166,7 @@ class BerandaPage extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                           builder: (context) {
-                            return Ojekhomepage(username: username);
+                            return Ojekhomepage(nama: nama, accessToken: widget.accessToken, );
                           },
                         ),
                       );
@@ -162,7 +233,7 @@ class BerandaPage extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                           builder: (context) {
-                            return kostHomepage(username: username, accessToken: accessToken);
+                            return kostHomepage(nama: nama, customerId: widget.customerId, accessToken: widget.accessToken);
                           },
                         ),
                       );

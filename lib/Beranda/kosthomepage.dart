@@ -3,15 +3,20 @@
 import 'package:flutter/material.dart';
 import 'package:staygo/Favorite/favorite.dart';
 import 'package:staygo/constants.dart';
+import 'package:staygo/kost/allkost.dart';
 import 'package:staygo/models.dart';
 import 'package:staygo/repository.dart';
 
 class kostHomepage extends StatefulWidget {
-  final String username;
+  final String nama;
   final String accessToken;
+  final int customerId;
 
   const kostHomepage(
-      {Key? key, required this.username, required this.accessToken})
+      {Key? key,
+      required this.nama,
+      required this.customerId,
+      required this.accessToken})
       : super(key: key);
 
   @override
@@ -25,22 +30,73 @@ class _kostHomepageState extends State<kostHomepage> {
   List<Kost> originalKostList = [];
   List<Kost> filteredKostList = [];
 
+  String username = '';
+  String nama = '';
+  String email = '';
+  String noHp = '';
+  String alamat = '';
+  String ttl = '';
+  String image = '';
+
+  bool isLoading = true;
+
   void filterKostList(String query) {
     setState(() {
       searchQuery = query.toLowerCase();
       if (searchQuery.isEmpty) {
-        filteredKostList = originalKostList; // Kembalikan data asli
+        filteredKostList =
+            originalKostList; // Return the original data if search is empty
       } else {
         filteredKostList = originalKostList.where((kost) {
-          return kost.namaKost.toLowerCase().contains(searchQuery);
+          // Check if the search query matches either the namaKost or alamat
+          return kost.namaKost.toLowerCase().contains(searchQuery) ||
+              kost.alamat.toLowerCase().contains(searchQuery);
         }).toList();
       }
     });
   }
 
+  Future<void> _fetchProfile() async {
+    try {
+      final repository = CustomerRepository();
+      final response =
+          await repository.getProfile(widget.customerId, widget.accessToken);
+
+      if (response['status']) {
+        final data = response['data'];
+        setState(() {
+          username = data['username'] ?? '';
+          nama = data['nama'] ?? '';
+          email = data['email'] ?? '';
+          noHp = data['noHp'] ?? '';
+          alamat = data['alamat'] ?? '';
+          ttl = data['ttl'] ?? '';
+          image = data['image'] ?? ''; // URL gambar
+          isLoading = false;
+        });
+      } else {
+        // Handle error
+        setState(() {
+          isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(response['message'])),
+        );
+      }
+    } catch (error) {
+      setState(() {
+        isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error fetching profile: $error")),
+      );
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+    _fetchProfile();
     if (widget.accessToken.isEmpty) {
       Navigator.pushReplacementNamed(context, '/login');
     } else {
@@ -56,6 +112,8 @@ class _kostHomepageState extends State<kostHomepage> {
 
   @override
   Widget build(BuildContext context) {
+    String profileImage = image.isEmpty ? 'profile.png' : image;
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
@@ -73,8 +131,8 @@ class _kostHomepageState extends State<kostHomepage> {
                   // Profile Picture
                   CircleAvatar(
                     radius: 30, // Larger radius for bigger avatar
-                    backgroundImage: AssetImage(
-                        'assets/profile.png'), // Replace with your profile image
+                    backgroundImage: NetworkImage(AppConstants.baseUrlImage +
+                        profileImage), // Replace with your profile image
                   ),
                   SizedBox(width: 15), // Space between avatar and text
 
@@ -87,16 +145,15 @@ class _kostHomepageState extends State<kostHomepage> {
                           children: [
                             Text(
                               'Halo, ' +
-                                  widget
-                                      .username, // Replace with dynamic name if necessary
+                                  nama, // Replace with dynamic name if necessary
                               style: TextStyle(
-                                fontSize: 20, // Larger font size
+                                fontSize: 17, // Larger font size
                                 fontWeight: FontWeight.bold,
                                 color: Colors.black,
                               ),
                             ),
                             Text('👋',
-                                style: TextStyle(fontSize: 20)), // Wave emoji
+                                style: TextStyle(fontSize: 17)), // Wave emoji
                           ],
                         ),
                         SizedBox(
@@ -112,23 +169,6 @@ class _kostHomepageState extends State<kostHomepage> {
                     ),
                   ),
 
-                  // Icons for Favorite and Notifications
-                  IconButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) {
-                            return FavoritePage(
-                                accessToken: widget.accessToken);
-                          },
-                        ),
-                      );
-                    },
-                    icon:
-                        Icon(Icons.favorite_outline, color: Color(0xFF05283c)),
-                    iconSize: 25,
-                  ),
                   IconButton(
                     onPressed: () {
                       // Tampilkan pop-up dialog ketika ikon notifikasi ditekan
@@ -190,7 +230,6 @@ class _kostHomepageState extends State<kostHomepage> {
                       _buildCategoryButton('assets/termurah.png', 'Termurah'),
                       _buildCategoryButton('assets/tahunan.png', 'Tahunan'),
                       _buildCategoryButton('assets/kalender.png', 'Bulanan'),
-                      _buildCategoryButton('assets/terbersih.png', 'Terbersih'),
                     ],
                   ),
                 ],
@@ -292,13 +331,38 @@ class _kostHomepageState extends State<kostHomepage> {
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: Align(
                 alignment: Alignment.centerLeft,
-                child: Text(
-                  'Rekomendasi Terbaik',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black,
-                  ),
+                child: Row(
+                  children: [
+                    Text(
+                      'Rekomendasi Terbaik',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black,
+                      ),
+                    ),
+                    Spacer(),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) {
+                              return AllKost(accessToken: widget.accessToken,);
+                            },
+                          ),
+                        );
+                      },
+                      child: Text(
+                        'Lihat Semua',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.blue,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -402,7 +466,9 @@ class _kostHomepageState extends State<kostHomepage> {
                                       ),
                                       SizedBox(height: 5),
                                       Text(
-                                        "Rp. ${kost.hargaPertahun} /tahun",
+                                        kost.hargaPertahun == 0
+                                            ? "Rp. ${kost.hargaPerbulan} /bulan" // Jika hargaPertahun == 0, tampilkan hargaPerbulan
+                                            : "Rp. ${kost.hargaPertahun} /tahun", // Jika hargaPertahun != 0, tampilkan hargaPertahun
                                         style: TextStyle(
                                           fontSize: 14,
                                           fontWeight: FontWeight.bold,

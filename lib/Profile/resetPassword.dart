@@ -1,9 +1,17 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
 import 'package:flutter/material.dart';
+import 'package:staygo/repository.dart';
 
 class ResetPassword extends StatefulWidget {
-  const ResetPassword({super.key});
+  final String accessToken;
+  final int customerId;
+
+  const ResetPassword({
+    Key? key,
+    required this.accessToken,
+    required this.customerId,
+  }) : super(key: key);
 
   @override
   State<ResetPassword> createState() => _ResetPasswordState();
@@ -13,6 +21,60 @@ class _ResetPasswordState extends State<ResetPassword> {
   bool _isObscureCurrentPassword = true;
   bool _isObscureNewPassword = true;
   bool _isObscureConfirmPassword = true;
+
+  final _currentPasswordController = TextEditingController();
+  final _newPasswordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+
+  final _customerRepository = CustomerRepository();
+
+  bool _isLoading = false;
+
+  void _resetPassword() async {
+    final currentPassword = _currentPasswordController.text.trim();
+    final newPassword = _newPasswordController.text.trim();
+    final confirmPassword = _confirmPasswordController.text.trim();
+
+    if (currentPassword.isEmpty ||
+        newPassword.isEmpty ||
+        confirmPassword.isEmpty) {
+      // Handle empty fields
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    final response = await _customerRepository.resetPassword(
+      accessToken: widget.accessToken,
+      customerId: widget.customerId,
+      currentPassword: currentPassword,
+      newPassword: newPassword,
+      confirmPassword: confirmPassword,
+    );
+
+    setState(() {
+      _isLoading = false;
+    });
+
+    if (response.status) {
+      // Password reset successful
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Password berhasil diubah'),
+        ),
+      );
+      Navigator.pop(context);
+    } else {
+      // Password reset failed
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(response.message),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,11 +132,14 @@ class _ResetPasswordState extends State<ResetPassword> {
                 padding: const EdgeInsets.symmetric(horizontal: 25.0),
                 child: Row(
                   children: [
-                    Icon(Icons.lock_clock_outlined, color: Colors.grey), // Icon "locked"
+                    Icon(Icons.lock_clock_outlined,
+                        color: Colors.grey), // Icon "locked"
                     SizedBox(width: 10), // Padding antara icon dan TextField
                     Expanded(
                       child: TextField(
-                        obscureText: _isObscureCurrentPassword,// Atur apakah password disembunyikan atau tidak
+                        controller: _currentPasswordController,
+                        obscureText:
+                            _isObscureCurrentPassword, // Atur apakah password disembunyikan atau tidak
                         decoration: InputDecoration(
                           border: UnderlineInputBorder(),
                           enabledBorder: UnderlineInputBorder(
@@ -85,7 +150,7 @@ class _ResetPasswordState extends State<ResetPassword> {
                                 BorderSide(color: Colors.black, width: 2.0),
                           ),
                           hintText: 'Password Sekarang',
-        
+
                           // Ikon mata di sebelah kanan untuk menampilkan atau menyembunyikan password
                           suffixIcon: IconButton(
                             icon: Icon(
@@ -127,14 +192,16 @@ class _ResetPasswordState extends State<ResetPassword> {
                 height: 10,
               ),
 
-               Padding(
+              Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 25.0),
                 child: Row(
                   children: [
-                    Icon(Icons.lock_outline, color: Colors.grey), // Icon "locked"
+                    Icon(Icons.lock_outline,
+                        color: Colors.grey), // Icon "locked"
                     SizedBox(width: 10), // Padding antara icon dan TextField
                     Expanded(
                       child: TextField(
+                        controller: _newPasswordController,
                         obscureText:
                             _isObscureNewPassword, // Atur apakah password disembunyikan atau tidak
                         decoration: InputDecoration(
@@ -147,7 +214,7 @@ class _ResetPasswordState extends State<ResetPassword> {
                                 BorderSide(color: Colors.black, width: 2.0),
                           ),
                           hintText: 'Password Baru',
-        
+
                           // Ikon mata di sebelah kanan untuk menampilkan atau menyembunyikan password
                           suffixIcon: IconButton(
                             icon: Icon(
@@ -173,14 +240,16 @@ class _ResetPasswordState extends State<ResetPassword> {
                 height: 10,
               ),
 
-               Padding(
+              Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 25.0),
                 child: Row(
                   children: [
-                    Icon(Icons.lock_clock_outlined, color: Colors.grey), // Icon "locked"
+                    Icon(Icons.lock_clock_outlined,
+                        color: Colors.grey), // Icon "locked"
                     SizedBox(width: 10), // Padding antara icon dan TextField
                     Expanded(
                       child: TextField(
+                        controller: _confirmPasswordController,
                         obscureText:
                             _isObscureConfirmPassword, // Atur apakah password disembunyikan atau tidak
                         decoration: InputDecoration(
@@ -193,7 +262,7 @@ class _ResetPasswordState extends State<ResetPassword> {
                                 BorderSide(color: Colors.black, width: 2.0),
                           ),
                           hintText: 'Konfirmasi Password',
-        
+
                           // Ikon mata di sebelah kanan untuk menampilkan atau menyembunyikan password
                           suffixIcon: IconButton(
                             icon: Icon(
@@ -218,13 +287,11 @@ class _ResetPasswordState extends State<ResetPassword> {
               SizedBox(
                 height: 110,
               ),
-        
+
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 25.0),
                 child: GestureDetector(
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
+                  onTap: _resetPassword,
                   child: Container(
                     padding: EdgeInsets.all(15),
                     decoration: BoxDecoration(
@@ -232,13 +299,15 @@ class _ResetPasswordState extends State<ResetPassword> {
                       borderRadius: BorderRadius.circular(50),
                     ),
                     child: Center(
-                      child: Text(
-                        'Simpan',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 15,
-                        ),
-                      ),
+                      child: _isLoading
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : const Text(
+                              'Simpan',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 15,
+                              ),
+                            ),
                     ),
                   ),
                 ),

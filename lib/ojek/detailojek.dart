@@ -6,7 +6,18 @@ final Uri _whatsappUrl = Uri.parse(
     'https://api.whatsapp.com/send?phone=6281264384767&text=Halo%20saya%20mau%20pesan%20Ojek');
 
 class Detailojek extends StatefulWidget {
-  const Detailojek({super.key});
+  final String accessToken;
+  final int ojekId;
+
+  Detailojek({
+    required this.accessToken,
+    required this.ojekId,
+    Key? key,
+  }) : super(key: key) {
+    if (accessToken.isEmpty) {
+      throw Exception('Access token is required');
+    }
+  }
 
   @override
   State<Detailojek> createState() => _DetailojekState();
@@ -190,7 +201,7 @@ class _DetailojekState extends State<Detailojek> {
                   SizedBox(height: 10),
 
                   Text(
-                    'Nama Lengkap: ' + ojekData['nama'],
+                    'Nama Lengkap: ' + ojekData['namaLengkap'],
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.black54,

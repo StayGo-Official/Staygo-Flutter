@@ -265,20 +265,24 @@ class _DetailKostState extends State<DetailKost> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Rp. ' + kostData['hargaPerbulan'].toString(),
+                        kostData['hargaPerbulan'] == 0
+                            ? 'Perbulan Tidak Tersedia' // Tampilkan teks jika harga 0
+                            : 'Rp. ' + kostData['hargaPerbulan'].toString(),
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
                         ),
                       ),
-                      Text(
-                        '/Perbulan',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey,
-                        ),
-                      ),
+                      kostData['hargaPerbulan'] == 0
+                          ? SizedBox() // Kosongkan teks "/Perbulan" jika harga 0
+                          : Text(
+                              '/Perbulan',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey,
+                              ),
+                            ),
                     ],
                   ),
 
@@ -289,20 +293,24 @@ class _DetailKostState extends State<DetailKost> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Rp. ' + kostData['hargaPertahun'].toString(),
+                        kostData['hargaPertahun'] == 0
+                            ? 'Tidak Tersedia' // Tampilkan teks jika harga 0
+                            : 'Rp. ' + kostData['hargaPertahun'].toString(),
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
                         ),
                       ),
-                      Text(
-                        '/Pertahun',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey,
-                        ),
-                      ),
+                      kostData['hargaPertahun'] == 0
+                          ? SizedBox() // Kosongkan teks "/Pertahun" jika harga 0
+                          : Text(
+                              '/Pertahun',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey,
+                              ),
+                            ),
                     ],
                   ),
 
