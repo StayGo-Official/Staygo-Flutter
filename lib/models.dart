@@ -113,6 +113,7 @@ class User {
   final String alamat;
   final String ttl;
   final String password;
+  bool isVerified;
   final String? image; // Filename of the image
   final String? url; // Full URL of the image
   final String refreshToken;
@@ -128,6 +129,7 @@ class User {
     required this.alamat,
     required this.ttl,
     required this.password,
+    required this.isVerified,
     required this.image,
     required this.url,
     required this.refreshToken,
@@ -146,6 +148,7 @@ class User {
       alamat: json['alamat'],
       ttl: json['ttl'],
       password: json['password'],
+      isVerified: json['isVerified'],
       image: json['image'], // Extract the filename
       url: json['url'], // Extract the full URL
       refreshToken: json['refresh_token'],
@@ -165,6 +168,7 @@ class User {
       'alamat': alamat,
       'ttl': ttl,
       'password': password,
+      'isVerified': isVerified,
       'image': image,
       'url': url,
       'refresh_token': refreshToken,
@@ -277,6 +281,40 @@ class ResetPasswordResponse {
 
   factory ResetPasswordResponse.fromJson(Map<String, dynamic> json) {
     return ResetPasswordResponse(
+      status: json['status'],
+      message: json['message'],
+    );
+  }
+}
+
+class VerificationResponse {
+  final bool status;
+  final String message;
+
+  VerificationResponse({
+    required this.status,
+    required this.message,
+  });
+
+  factory VerificationResponse.fromJson(Map<String, dynamic> json) {
+    return VerificationResponse(
+      status: json['status'],
+      message: json['message'],
+    );
+  }
+}
+
+class VerifyEmailResponse {
+  final bool status;
+  final String message;
+
+  VerifyEmailResponse({
+    required this.status,
+    required this.message,
+  });
+
+  factory VerifyEmailResponse.fromJson(Map<String, dynamic> json) {
+    return VerifyEmailResponse(
       status: json['status'],
       message: json['message'],
     );

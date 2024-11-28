@@ -6,29 +6,13 @@ import 'package:staygo/repository.dart';
 import 'package:staygo/constants.dart';
 
 class EditProfile extends StatefulWidget {
-  final String username;
-  final String nama;
-  final String email;
-  final String noHp;
-  final String alamat;
-  final String ttl;
-  final String image;
   final String accessToken;
   final int customerId;
-  final Function(Map<String, dynamic>) onProfileUpdated;
 
   const EditProfile({
     Key? key,
-    required this.username,
-    required this.nama,
-    required this.email,
-    required this.noHp,
-    required this.alamat,
-    required this.ttl,
-    required this.image,
     required this.accessToken,
     required this.customerId,
-    required this.onProfileUpdated,
   }) : super(key: key);
 
   @override
@@ -49,6 +33,46 @@ class _EditProfileState extends State<EditProfile> {
   final _picker = ImagePicker(); // Inisialisasi ImagePicker
   bool _isLoading = false;
 
+  bool isLoading = true;
+
+  String currentImageUrl = "";
+
+  Future<void> _fetchProfile() async {
+    setState(() {
+      _isLoading = true; // Start loading
+    });
+
+    try {
+      final response =
+          await _repository.getProfile(widget.customerId, widget.accessToken);
+
+      if (response['status']) {
+        final data = response['data'];
+        setState(() {
+          // Assign values to text controllers
+          _nameController.text = data['nama'] ?? '';
+          _emailController.text = data['email'] ?? '';
+          _phoneController.text = data['noHp'] ?? '';
+          _addressController.text = data['alamat'] ?? '';
+          _dateController.text = data['ttl'] ?? '';
+          currentImageUrl = data['image'] ?? '';
+        });
+      } else {
+        // Handle error if profile fetch failed
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(response['message'])));
+      }
+    } catch (e) {
+      // Handle exception
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Error fetching profile: $e')));
+    } finally {
+      setState(() {
+        _isLoading = false; // Stop loading
+      });
+    }
+  }
+
   Future<void> _selectDate(BuildContext context) async {
     DateTime? selectedDate = await showDatePicker(
       context: context,
@@ -64,16 +88,12 @@ class _EditProfileState extends State<EditProfile> {
     }
   }
 
-  Future<void> _getImage() async {
-    final pickedFile =
-        await _picker.pickImage(source: ImageSource.gallery, imageQuality: 80);
-
+  Future<void> _pickImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() {
         _image = File(pickedFile.path);
       });
-    } else {
-      print('No image selected');
     }
   }
 
@@ -111,50 +131,45 @@ class _EditProfileState extends State<EditProfile> {
     return true;
   }
 
-  Future<void> _saveProfile() async {
-    if (!_validateInputs()) return;
-
+  Future<void> _updateProfile() async {
     setState(() {
-      _isLoading = true;
+      _isLoading = true; // Start loading
     });
 
+    // Prepare the profile data
     final profileData = {
-      'nama': _nameController.text.trim(),
-      'email': _emailController.text.trim(),
-      'noHp': _phoneController.text.trim(),
-      'alamat': _addressController.text.trim(),
-      'ttl': _dateController.text.trim(),
+      'nama': _nameController.text,
+      'email': _emailController.text,
+      'noHp': _phoneController.text,
+      'alamat': _addressController.text,
+      'ttl': _dateController.text,
     };
 
-    final response = await _repository.updateCustomerProfile(
-      accessToken: widget.accessToken,
-      customerId: widget.customerId,
-      profileData: profileData,
-      imageFile: _image,
-    );
-
-    if (response['status']) {
-      final updatedImagePath = response['imagePath'];
-      final updatedProfile = {
-        ...profileData,
-        'image': updatedImagePath,
-      };
-
-      widget.onProfileUpdated(updatedProfile);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(response['message'])),
+    try {
+      final response = await _repository.updateCustomerProfile(
+        accessToken: widget.accessToken,
+        customerId: widget.customerId,
+        profileData: profileData,
+        imageFile: _image, // Pass the image file if selected
       );
-      Navigator.pop(context); // Navigate back to profile page
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(response['message'] ?? 'Update failed')),
-      );
+
+      if (response['status']) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Profile updated successfully')));
+        Navigator.pop(context);
+      } else {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(response['message'])));
+      }
+    } catch (e) {
+      // Handle exception
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Error updating profile: $e')));
+    } finally {
+      setState(() {
+        _isLoading = false; // Stop loading
+      });
     }
-
-    setState(() {
-      _isLoading = false;
-    });
   }
 
   String? updatedImage;
@@ -162,19 +177,14 @@ class _EditProfileState extends State<EditProfile> {
   @override
   void initState() {
     super.initState();
-
-    // Inisialisasi data awal
-    _nameController.text = widget.nama;
-    _emailController.text = widget.email;
-    _phoneController.text = widget.noHp;
-    _addressController.text = widget.alamat;
-    _dateController.text = widget.ttl;
-    updatedImage =
-        widget.image; // Pastikan updatedImage dimuat dari widget.image
+    _fetchProfile(); // Fetch the profile when the screen is initialized
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Center(child: CircularProgressIndicator());
+    }
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -204,24 +214,15 @@ class _EditProfileState extends State<EditProfile> {
           child: Column(
             children: [
               GestureDetector(
-                onTap: _getImage, // Aksi ketika gambar diklik
+                onTap: _pickImage, // Aksi ketika gambar diklik
                 child: CircleAvatar(
-                  radius: 50,
-                  backgroundImage: _image != null
-                      ? FileImage(_image!) // Jika ada file gambar yang dipilih
-                      : (updatedImage != null && updatedImage!.isNotEmpty
-                          ? (updatedImage!.contains(AppConstants.baseUrlImage)
-                              ? NetworkImage(updatedImage!) // URL lengkap
-                              : NetworkImage(
-                                  '${AppConstants.baseUrlImage}$updatedImage')) // Tambahkan base URL jika belum lengkap
-                          : AssetImage('assets/profile.png')) as ImageProvider,
-                  child: _image == null
-                      ? Icon(
-                          Icons.camera_alt,
-                          color: Colors.grey,
-                        )
-                      : null,
-                ),
+                    radius: 60,
+                    backgroundImage: _image != null
+                        ? FileImage(_image!) // Show selected image
+                        : currentImageUrl != null && currentImageUrl!.isNotEmpty
+                            ? NetworkImage(AppConstants.baseUrlImage +
+                                currentImageUrl!) as ImageProvider
+                            : AssetImage('assets/profile.png')),
               ),
               SizedBox(
                 height: 30,
@@ -409,7 +410,7 @@ class _EditProfileState extends State<EditProfile> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 25.0),
                 child: GestureDetector(
-                  onTap: _isLoading ? null : _saveProfile,
+                  onTap: _isLoading ? null : _updateProfile,
                   child: Container(
                     padding: EdgeInsets.all(15),
                     decoration: BoxDecoration(

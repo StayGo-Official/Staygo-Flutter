@@ -41,7 +41,10 @@ dependencies:
   flutter_launcher_icons: ^0.14.1
   mime: ^1.0.0
   http_parser: ^4.0.0
-  http: ^0.13.5
+  http: ^1.2.2
+  pinput: ^5.0.0
+  google_fonts: ^6.2.1
+  fluttertoast: ^8.2.8
 
 
 flutter_launcher_icons:
@@ -122,6 +125,7 @@ flutter:
     - assets/kost-muchtar2.jpg
     - assets/kost-green1.jpg
     - assets/kost-green2.jpg
+    - assets/image_verifikasi.jpg
     
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

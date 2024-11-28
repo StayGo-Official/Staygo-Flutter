@@ -6,25 +6,11 @@ import 'package:staygo/Profile/profilePage.dart';
 
 class BottomNavigation extends StatefulWidget {
   final int customerId;
-  final String username;
-  final String nama;
-  final String email;
-  final String noHp;
-  final String alamat;
-  final String ttl;
-  final String image;
   final String accessToken;
 
   const BottomNavigation(
       {Key? key,
       required this.customerId,
-      required this.username,
-      required this.nama,
-      required this.email,
-      required this.noHp,
-      required this.alamat,
-      required this.ttl,
-      required this.image,
       required this.accessToken})
       : super(key: key);
 
@@ -42,17 +28,10 @@ class _BottomNavigationState extends State<BottomNavigation> {
     super.initState();
     // Initialize pages with the username for BerandaPage.
     _pages = [
-      BerandaPage(nama: widget.nama, customerId: widget.customerId, accessToken: widget.accessToken),
+      BerandaPage(customerId: widget.customerId, accessToken: widget.accessToken),
       HistoryPemesanan(),
-      FavoritePage(accessToken: widget.accessToken),
+      FavoritePage(customerId: widget.customerId, accessToken: widget.accessToken),
       Profilepage(
-        username: widget.username,
-        nama: widget.nama,
-        email: widget.email,
-        noHp: widget.noHp,
-        alamat: widget.alamat,
-        ttl: widget.ttl,
-        image: widget.image,
         accessToken: widget.accessToken,
         customerId: widget.customerId,
       ),

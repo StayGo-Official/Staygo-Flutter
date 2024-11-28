@@ -11,25 +11,11 @@ import 'package:staygo/repository.dart';
 import 'package:staygo/constants.dart';
 
 class Profilepage extends StatefulWidget {
-  final String username;
-  final String nama;
-  final String email;
-  final String noHp;
-  final String alamat;
-  final String ttl;
-  final String image;
   final String accessToken;
   final int customerId;
 
   const Profilepage({
     Key? key,
-    required this.username,
-    required this.nama,
-    required this.email,
-    required this.noHp,
-    required this.alamat,
-    required this.ttl,
-    required this.image,
     required this.accessToken,
     required this.customerId,
   }) : super(key: key);
@@ -229,13 +215,6 @@ class _ProfilepageState extends State<Profilepage> {
                         MaterialPageRoute(
                           builder: (context) {
                             return BottomNavigation(
-                              username: username,
-                              nama: nama,
-                              email: email,
-                              noHp: noHp,
-                              alamat: alamat,
-                              ttl: ttl,
-                              image: image,
                               accessToken: widget.accessToken,
                               customerId: widget.customerId,
                             );
@@ -324,31 +303,8 @@ class _ProfilepageState extends State<Profilepage> {
                   MaterialPageRoute(
                     builder: (context) {
                       return EditProfile(
-                        username: username,
-                        nama: nama,
-                        email: email,
-                        noHp: noHp,
-                        alamat: alamat,
-                        ttl: ttl,
-                        image: image, // Pastikan image terbaru diteruskan
                         accessToken: widget.accessToken,
                         customerId: widget.customerId,
-                        onProfileUpdated: (updatedData) {
-                          setState(() {
-                            if (updatedData['nama'] != null)
-                              nama = updatedData['nama'];
-                            if (updatedData['email'] != null)
-                              email = updatedData['email'];
-                            if (updatedData['noHp'] != null)
-                              noHp = updatedData['noHp'];
-                            if (updatedData['alamat'] != null)
-                              alamat = updatedData['alamat'];
-                            if (updatedData['ttl'] != null)
-                              ttl = updatedData['ttl'];
-                            if (updatedData['image'] != null)
-                              image = updatedData['image'];
-                          });
-                        },
                       );
                     },
                   ),
@@ -365,7 +321,10 @@ class _ProfilepageState extends State<Profilepage> {
                   context,
                   MaterialPageRoute(
                     builder: (context) {
-                      return KonfirmasiEmail();
+                      return KonfirmasiEmail(
+                        accessToken: widget.accessToken,
+                        customerId: widget.customerId,
+                      );
                     },
                   ),
                 );

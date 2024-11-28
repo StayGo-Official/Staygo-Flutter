@@ -7,12 +7,10 @@ import 'package:staygo/constants.dart';
 import 'package:staygo/repository.dart';
 
 class BerandaPage extends StatefulWidget {
-  final String nama;
   final int customerId;
   final String accessToken;
 
   const BerandaPage({
-    required this.nama,
     required this.customerId,
     required this.accessToken,
   });

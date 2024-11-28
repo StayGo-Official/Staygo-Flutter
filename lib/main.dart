@@ -37,6 +37,7 @@ class MyApp extends StatelessWidget {
 
           return DetailKost(
             accessToken: arguments['accessToken'] as String,
+            customerId: arguments['customerId'] as int,
             kostId: arguments['kostId'] as int,
           );
         },

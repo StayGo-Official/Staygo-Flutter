@@ -57,13 +57,6 @@ class _LoginPageState extends State<LoginPage> {
           SnackBar(content: Text('Login sukses: ${response.message}')),
         );
 
-        final username = response.user?.username ?? 'Pengguna';
-        final nama = response.user?.nama ?? '-';
-        final email = response.user?.email ?? '-';
-        final noHp = response.user?.noHp ?? '-';
-        final alamat = response.user?.alamat ?? '-';
-        final ttl = response.user?.ttl ?? '-';
-        final image = response.user?.image ?? '';
         final accessToken = response.accessToken ?? '';
 
         // Navigasi ke halaman utama
@@ -71,13 +64,6 @@ class _LoginPageState extends State<LoginPage> {
           context,
           MaterialPageRoute(
             builder: (context) => BottomNavigation(
-              username: response.user?.username ?? '',
-              nama: response.user?.nama ?? '',
-              email: response.user?.email ?? '',
-              noHp: response.user?.noHp ?? '',
-              alamat: response.user?.alamat ?? '',
-              ttl: response.user?.ttl ?? '',
-              image: image,
               accessToken: accessToken,
               customerId: response.user?.id ?? 0,
             ), // Pass username here.

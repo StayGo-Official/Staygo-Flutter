@@ -8,8 +8,9 @@ import 'package:staygo/repository.dart';
 
 class FavoritePage extends StatefulWidget {
   final String accessToken;
+  final int customerId;
 
-  const FavoritePage({Key? key, required this.accessToken}) : super(key: key);
+  const FavoritePage({Key? key, required this.accessToken, required this.customerId}) : super(key: key);
 
   @override
   State<FavoritePage> createState() => _FavoritePageState();
@@ -426,6 +427,7 @@ class _FavoritePageState extends State<FavoritePage> {
                     MaterialPageRoute(
                       builder: (context) => DetailKost(
                         accessToken: widget.accessToken,
+                        customerId: widget.customerId,
                         kostId: kost['id'],
                       ),
                       settings: RouteSettings(arguments: kost),

@@ -399,6 +399,7 @@ class _kostHomepageState extends State<kostHomepage> {
                                 'images': kost.images,
                                 'accessToken': widget.accessToken,
                                 'kostId': kost.id,
+                                'customerId': widget.customerId,
                               },
                             );
                           },

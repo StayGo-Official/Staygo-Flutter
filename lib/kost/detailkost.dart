@@ -1,5 +1,7 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, sort_child_properties_last, sized_box_for_whitespace
 
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:staygo/repository.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -10,10 +12,12 @@ final Uri _whatsappUrl = Uri.parse(
 
 class DetailKost extends StatefulWidget {
   final String accessToken;
+  final int customerId;
   final int kostId;
 
   DetailKost({
     required this.accessToken,
+    required this.customerId,
     required this.kostId,
     Key? key,
   }) : super(key: key) {
@@ -30,7 +34,46 @@ class _DetailKostState extends State<DetailKost> {
   bool isFavorite = false;
   bool isLoading = false;
 
+  String username = '';
+  String nama = '';
+  String email = '';
+  String noHp = '';
+  String alamat = '';
+  String ttl = '';
+  bool isVerified = false;
+  String image = '';
+
   final FavoriteKostRepository _repository = FavoriteKostRepository();
+
+  Future<void> _fetchProfile() async {
+  try {
+    final repository = CustomerRepository();
+    final response =
+        await repository.getProfile(widget.customerId, widget.accessToken);
+
+    if (response['status']) {
+      final data = response['data'];
+      setState(() {
+        username = data['username'] ?? '';
+        nama = data['nama'] ?? '';
+        email = data['email'] ?? '';
+        noHp = data['noHp'] ?? '';
+        alamat = data['alamat'] ?? '';
+        ttl = data['ttl'] ?? '';
+        isVerified = data['isVerified'] ?? false; // Ensure boolean value
+        image = data['image'] ?? '';
+      });
+    } else {
+      // Handle error if profile is not found
+      setState(() {
+        isVerified = false; // Default to false if not found
+      });
+    }
+  } catch (e) {
+    // Handle error in fetching profile
+    print('Error fetching profile: $e');
+  }
+}
 
   Future<void> _addToFavorite() async {
     setState(() {
@@ -116,16 +159,40 @@ class _DetailKostState extends State<DetailKost> {
     }
   }
 
-  Future<void> _launchWhatsApp() async {
+Future<void> _launchWhatsApp() async {
+  // Check if the user is verified before proceeding
+  if (!isVerified) {
+    // Show alert dialog asking the user to verify their email
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Verifikasi Email"),
+          content: Text("Silahkan Verifikasi Email Terlebih dahulu"),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: Text("Tutup"),
+            ),
+          ],
+        );
+      },
+    );
+  } else {
+    // Proceed to launch WhatsApp if the user is verified
     if (!await launchUrl(_whatsappUrl)) {
       throw Exception('Could not launch $_whatsappUrl');
     }
   }
+}
 
   @override
   void initState() {
     super.initState();
     _checkIfFavorite(); // Periksa status favorit saat halaman dimuat
+    _fetchProfile();
   }
 
   @override

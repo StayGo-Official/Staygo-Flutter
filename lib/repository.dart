@@ -509,3 +509,79 @@ class FavoriteOjekRepository {
   }
   
 }
+
+class VerificationEmailRepository {
+  final endpoint = AppConstants.baseUrl;
+
+  Future<Map<String, dynamic>> sendVerifikasi({
+    required String accessToken,
+    required String email,
+  }) async {
+    final url = Uri.parse('$endpoint/send-verification-code');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+        body: jsonEncode({'email': email}),
+      );
+
+      // Decode respons backend
+      final Map<String, dynamic> decodedResponse = jsonDecode(response.body);
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        // Return respons jika sukses
+        return decodedResponse;
+      } else {
+        // Jika gagal, kembalikan respons backend dengan status false
+        return {
+          'status': false,
+          'message': decodedResponse['message'] ?? 'Gagal mengirim Kode Verifikasi',
+        };
+      }
+    } catch (error) {
+      // Tangani error lain
+      throw Exception('Error adding favorite: $error');
+    }
+  }
+
+  Future<Map<String, dynamic>> verifyEmail({
+    required String accessToken,
+    required String email,
+    required String verificationCode,
+  }) async {
+    final url = Uri.parse('$endpoint/verify-email');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+        body: jsonEncode({'email': email, 'verificationCode': verificationCode}),
+      );
+
+      // Decode respons backend
+      final Map<String, dynamic> decodedResponse = jsonDecode(response.body);
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        // Return respons jika sukses
+        return decodedResponse;
+      } else {
+        // Jika gagal, kembalikan respons backend dengan status false
+        return {
+          'status': false,
+          'message': decodedResponse['message'] ?? 'Gagal mengirim Kode Verifikasi',
+        };
+      }
+    } catch (error) {
+      // Tangani error lain
+      throw Exception('Error adding favorite: $error');
+    }
+  }
+  
+}
