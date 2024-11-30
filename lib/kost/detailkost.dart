@@ -33,6 +33,7 @@ class DetailKost extends StatefulWidget {
 class _DetailKostState extends State<DetailKost> {
   bool isFavorite = false;
   bool isLoading = false;
+  bool isLoadingOrder = false;
 
   String username = '';
   String nama = '';
@@ -43,37 +44,38 @@ class _DetailKostState extends State<DetailKost> {
   bool isVerified = false;
   String image = '';
 
-  final FavoriteKostRepository _repository = FavoriteKostRepository();
+  final FavoriteKostRepository _repositoryFavorite = FavoriteKostRepository();
+  final OrderKostRepository _repositoryOrderKost = OrderKostRepository();
 
   Future<void> _fetchProfile() async {
-  try {
-    final repository = CustomerRepository();
-    final response =
-        await repository.getProfile(widget.customerId, widget.accessToken);
+    try {
+      final repository = CustomerRepository();
+      final response =
+          await repository.getProfile(widget.customerId, widget.accessToken);
 
-    if (response['status']) {
-      final data = response['data'];
-      setState(() {
-        username = data['username'] ?? '';
-        nama = data['nama'] ?? '';
-        email = data['email'] ?? '';
-        noHp = data['noHp'] ?? '';
-        alamat = data['alamat'] ?? '';
-        ttl = data['ttl'] ?? '';
-        isVerified = data['isVerified'] ?? false; // Ensure boolean value
-        image = data['image'] ?? '';
-      });
-    } else {
-      // Handle error if profile is not found
-      setState(() {
-        isVerified = false; // Default to false if not found
-      });
+      if (response['status']) {
+        final data = response['data'];
+        setState(() {
+          username = data['username'] ?? '';
+          nama = data['nama'] ?? '';
+          email = data['email'] ?? '';
+          noHp = data['noHp'] ?? '';
+          alamat = data['alamat'] ?? '';
+          ttl = data['ttl'] ?? '';
+          isVerified = data['isVerified'] ?? false; // Ensure boolean value
+          image = data['image'] ?? '';
+        });
+      } else {
+        // Handle error if profile is not found
+        setState(() {
+          isVerified = false; // Default to false if not found
+        });
+      }
+    } catch (e) {
+      // Handle error in fetching profile
+      print('Error fetching profile: $e');
     }
-  } catch (e) {
-    // Handle error in fetching profile
-    print('Error fetching profile: $e');
   }
-}
 
   Future<void> _addToFavorite() async {
     setState(() {
@@ -82,7 +84,7 @@ class _DetailKostState extends State<DetailKost> {
 
     try {
       // Panggil fungsi repository
-      final response = await _repository.addFavorite(
+      final response = await _repositoryFavorite.addFavorite(
         accessToken: widget.accessToken,
         kostId: widget.kostId,
       );
@@ -127,7 +129,7 @@ class _DetailKostState extends State<DetailKost> {
 
   Future<void> _checkIfFavorite() async {
     try {
-      final response = await _repository.checkIfFavorite(
+      final response = await _repositoryFavorite.checkIfFavorite(
         accessToken: widget.accessToken,
         kostId: widget.kostId,
       );
@@ -159,34 +161,79 @@ class _DetailKostState extends State<DetailKost> {
     }
   }
 
-Future<void> _launchWhatsApp() async {
-  // Check if the user is verified before proceeding
-  if (!isVerified) {
-    // Show alert dialog asking the user to verify their email
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("Verifikasi Email"),
-          content: Text("Silahkan Verifikasi Email Terlebih dahulu"),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: Text("Tutup"),
-            ),
-          ],
+  Future<void> _launchWhatsApp() async {
+    // Check if the user is verified before proceeding
+    setState(() {
+      isLoadingOrder = true; // Tampilkan indikator loading
+    });
+
+    if (!isVerified) {
+      // Show alert dialog asking the user to verify their email
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Verifikasi Email"),
+            content: Text("Silahkan Verifikasi Email Terlebih dahulu"),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(); // Close the dialog
+                },
+                child: Text("Tutup"),
+              ),
+            ],
+          );
+        },
+      );
+    } else {
+
+      // Proceed to launch WhatsApp if the user is verified
+      try {
+        // Panggil fungsi repository
+        final response = await _repositoryOrderKost.addOrder(
+          accessToken: widget.accessToken,
+          kostId: widget.kostId,
         );
-      },
-    );
-  } else {
-    // Proceed to launch WhatsApp if the user is verified
-    if (!await launchUrl(_whatsappUrl)) {
-      throw Exception('Could not launch $_whatsappUrl');
+
+        if (response['status'] == true) {
+
+          // Tampilkan pesan sukses
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(response['message']),
+              backgroundColor: Colors.green,
+            ),
+          );
+        } else {
+          // Jika gagal, tampilkan pesan error dari backend
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content:
+                  Text(response['message'] ?? 'Gagal menambahkan ke order kost'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } catch (error) {
+        // Tangani error yang tidak diantisipasi
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Terjadi kesalahan: ${error.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      } finally {
+        setState(() {
+          isLoading = false; // Matikan indikator loading setelah selesai
+        });
+      }
+
+      if (!await launchUrl(_whatsappUrl)) {
+        throw Exception('Could not launch $_whatsappUrl');
+      }
     }
   }
-}
 
   @override
   void initState() {
@@ -604,9 +651,7 @@ Future<void> _launchWhatsApp() async {
             ),
             SizedBox(width: 10), // Spasi antara tombol
             FloatingActionButton(
-              onPressed: isLoading
-                  ? null
-                  : _addToFavorite, // Panggil fungsi tambah favorit
+              onPressed: _addToFavorite, // Panggil fungsi tambah favorit
               backgroundColor: Colors.white, // Warna tombol favorit
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(50), // Sudut membulat

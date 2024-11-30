@@ -164,7 +164,7 @@ class _BerandaPageState extends State<BerandaPage> {
                         context,
                         MaterialPageRoute(
                           builder: (context) {
-                            return Ojekhomepage(nama: nama, accessToken: widget.accessToken, );
+                            return Ojekhomepage(nama: nama, accessToken: widget.accessToken, customerId: widget.customerId, );
                           },
                         ),
                       );

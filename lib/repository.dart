@@ -585,3 +585,127 @@ class VerificationEmailRepository {
   }
   
 }
+
+class OrderKostRepository {
+  final endpoint = AppConstants.baseUrl;
+
+  // Fetch Order Kost
+  Future<List<dynamic>> fetchOrderKost(String accessToken) async {
+    final url = Uri.parse('$endpoint/order-kost');
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body); // Return the parsed JSON response
+      } else {
+        throw Exception('Failed to load order kost');
+      }
+    } catch (error) {
+      print('Error fetching order kost: $error');
+      throw Exception('Error fetching order kost');
+    }
+  }
+
+  Future<Map<String, dynamic>> addOrder({
+    required String accessToken,
+    required int kostId,
+  }) async {
+    final url = Uri.parse('$endpoint/order-kost');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+        body: jsonEncode({'kostId': kostId}),
+      );
+
+      // Decode respons backend
+      final Map<String, dynamic> decodedResponse = jsonDecode(response.body);
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        // Return respons jika sukses
+        return decodedResponse;
+      } else {
+        // Jika gagal, kembalikan respons backend dengan status false
+        return {
+          'status': false,
+          'message': decodedResponse['message'] ?? 'Gagal menambahkan order',
+        };
+      }
+    } catch (error) {
+      // Tangani error lain
+      throw Exception('Error adding order: $error');
+    }
+  }
+  
+}
+
+class OrderOjekRepository {
+  final endpoint = AppConstants.baseUrl;
+
+  // Fetch Order Ojek
+  Future<List<dynamic>> fetchOrderOjek(String accessToken) async {
+    final url = Uri.parse('$endpoint/order-ojek');
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body); // Return the parsed JSON response
+      } else {
+        throw Exception('Failed to load order ojek');
+      }
+    } catch (error) {
+      print('Error fetching order ojek: $error');
+      throw Exception('Error fetching order ojek');
+    }
+  }
+
+  Future<Map<String, dynamic>> addOrder({
+    required String accessToken,
+    required int ojekId,
+  }) async {
+    final url = Uri.parse('$endpoint/order-ojek');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+        body: jsonEncode({'ojekId': ojekId}),
+      );
+
+      // Decode respons backend
+      final Map<String, dynamic> decodedResponse = jsonDecode(response.body);
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        // Return respons jika sukses
+        return decodedResponse;
+      } else {
+        // Jika gagal, kembalikan respons backend dengan status false
+        return {
+          'status': false,
+          'message': decodedResponse['message'] ?? 'Gagal menambahkan order',
+        };
+      }
+    } catch (error) {
+      // Tangani error lain
+      throw Exception('Error adding order: $error');
+    }
+  }
+  
+}

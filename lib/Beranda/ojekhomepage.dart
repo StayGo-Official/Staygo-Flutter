@@ -9,8 +9,13 @@ import 'package:staygo/repository.dart';
 class Ojekhomepage extends StatefulWidget {
   final String nama;
   final String accessToken;
+  final int customerId;
 
-  const Ojekhomepage({Key? key, required this.nama, required this.accessToken})
+  const Ojekhomepage(
+      {Key? key,
+      required this.nama,
+      required this.accessToken,
+      required this.customerId})
       : super(key: key);
 
   @override
@@ -420,12 +425,15 @@ class _OjekhomepageState extends State<Ojekhomepage> {
                                       Navigator.of(context).popAndPushNamed(
                                         '/detail-ojek',
                                         arguments: {
-                                          'id': ojek.id,
+                                          'ojekId': ojek.id,
                                           'nama': ojek.nama,
+                                          'namaLengkap': ojek.namaLengkap,
                                           'alamat': ojek.alamat,
                                           'status': ojek.status,
                                           'gender': ojek.gender,
                                           'images': ojek.images,
+                                          'accessToken': widget.accessToken,
+                                          'customerId': widget.customerId,
                                         },
                                       );
                                     },
@@ -585,13 +593,15 @@ class _OjekhomepageState extends State<Ojekhomepage> {
                                     Navigator.of(context).popAndPushNamed(
                                       '/detail-ojek',
                                       arguments: {
-                                        'id': ojek.id,
+                                        'ojekId': ojek.id,
                                         'nama': ojek.nama,
                                         'namaLengkap': ojek.namaLengkap,
                                         'alamat': ojek.alamat,
                                         'status': ojek.status,
                                         'gender': ojek.gender,
                                         'images': ojek.images,
+                                        'accessToken': widget.accessToken,
+                                        'customerId': widget.customerId,
                                       },
                                     );
                                   },

@@ -29,7 +29,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
     // Initialize pages with the username for BerandaPage.
     _pages = [
       BerandaPage(customerId: widget.customerId, accessToken: widget.accessToken),
-      HistoryPemesanan(),
+      HistoryPemesanan(customerId: widget.customerId, accessToken: widget.accessToken),
       FavoritePage(customerId: widget.customerId, accessToken: widget.accessToken),
       Profilepage(
         accessToken: widget.accessToken,

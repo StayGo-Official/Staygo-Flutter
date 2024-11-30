@@ -52,11 +52,12 @@ class MyApp extends StatelessWidget {
               arguments['accessToken'] == null ||
               arguments['ojekId'] == null) {
             throw Exception(
-                'Missing required arguments: accessToken or ojekId');
+                'Missing required arguments: accessToken, ojekId');
           }
 
           return Detailojek(
             accessToken: arguments['accessToken'] as String,
+            customerId: arguments['customerId'] as int,
             ojekId: arguments['ojekId'] as int,
           );
         },

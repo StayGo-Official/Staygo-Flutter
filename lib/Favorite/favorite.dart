@@ -268,7 +268,7 @@ class _FavoritePageState extends State<FavoritePage> {
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text('No favorite kost found'));
+          return const Center(child: Text('No favorite ojek found'));
         } else {
           final favoriteOjekList = snapshot.data!;
           return SizedBox(
@@ -361,6 +361,7 @@ class _FavoritePageState extends State<FavoritePage> {
                                 MaterialPageRoute(
                                   builder: (context) => Detailojek(
                                     accessToken: widget.accessToken,
+                                    customerId: widget.customerId,
                                     ojekId: ojekData['id'],
                                   ),
                                   settings: RouteSettings(arguments: ojekData),
@@ -397,7 +398,6 @@ class _FavoritePageState extends State<FavoritePage> {
             ),
           );
         }
-        ;
       },
     );
   }

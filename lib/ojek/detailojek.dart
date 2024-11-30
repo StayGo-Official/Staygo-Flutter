@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:staygo/repository.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:staygo/constants.dart';
 
@@ -7,10 +8,12 @@ final Uri _whatsappUrl = Uri.parse(
 
 class Detailojek extends StatefulWidget {
   final String accessToken;
+  final int customerId;
   final int ojekId;
 
   Detailojek({
     required this.accessToken,
+    required this.customerId,
     required this.ojekId,
     Key? key,
   }) : super(key: key) {
@@ -26,15 +29,124 @@ class Detailojek extends StatefulWidget {
 class _DetailojekState extends State<Detailojek> {
   int _currentIndex = 0;
 
+  bool isLoading = false;
+  bool isLoadingOrder = false;
+
+  String username = '';
+  String nama = '';
+  String email = '';
+  String noHp = '';
+  String alamat = '';
+  String ttl = '';
+  bool isVerified = false;
+  String image = '';
+
+  final OrderOjekRepository _repositoryOrderOjek = OrderOjekRepository();
+
+  Future<void> _fetchProfile() async {
+    try {
+      final repository = CustomerRepository();
+      final response =
+          await repository.getProfile(widget.customerId, widget.accessToken);
+
+      if (response['status']) {
+        final data = response['data'];
+        setState(() {
+          username = data['username'] ?? '';
+          nama = data['nama'] ?? '';
+          email = data['email'] ?? '';
+          noHp = data['noHp'] ?? '';
+          alamat = data['alamat'] ?? '';
+          ttl = data['ttl'] ?? '';
+          isVerified = data['isVerified'] ?? false; // Ensure boolean value
+          image = data['image'] ?? '';
+        });
+      } else {
+        // Handle error if profile is not found
+        setState(() {
+          isVerified = false; // Default to false if not found
+        });
+      }
+    } catch (e) {
+      // Handle error in fetching profile
+      print('Error fetching profile: $e');
+    }
+  }
+
   Future<void> _launchWhatsApp() async {
-    if (!await launchUrl(_whatsappUrl)) {
-      throw Exception('Could not launch $_whatsappUrl');
+    setState(() {
+      isLoadingOrder = true; // Tampilkan indikator loading
+    });
+
+    if (!isVerified) {
+      // Show alert dialog asking the user to verify their email
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Verifikasi Email"),
+            content: Text("Silahkan Verifikasi Email Terlebih dahulu"),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(); // Close the dialog
+                },
+                child: Text("Tutup"),
+              ),
+            ],
+          );
+        },
+      );
+    } else {
+      try {
+        // Panggil fungsi repository
+        final response = await _repositoryOrderOjek.addOrder(
+          accessToken: widget.accessToken,
+          ojekId: widget.ojekId,
+        );
+
+        if (response['status'] == true) {
+          // Tampilkan pesan sukses
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(response['message']),
+              backgroundColor: Colors.green,
+            ),
+          );
+        } else {
+          // Jika gagal, tampilkan pesan error dari backend
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                  response['message'] ?? 'Gagal menambahkan ke order ojek'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } catch (error) {
+        // Tangani error yang tidak diantisipasi
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Terjadi kesalahan: ${error.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      } finally {
+        setState(() {
+          isLoading = false; // Matikan indikator loading setelah selesai
+        });
+      }
+
+      if (!await launchUrl(_whatsappUrl)) {
+        throw Exception('Could not launch $_whatsappUrl');
+      }
     }
   }
 
   @override
   void initState() {
     super.initState();
+    _fetchProfile();
   }
 
   @override
@@ -46,6 +158,14 @@ class _DetailojekState extends State<Detailojek> {
         .map<String>((image) =>
             AppConstants.baseUrlImage + image) // Gabungkan dengan baseUrlImage
         .toList();
+
+    if (ojekData == null) {
+      print("Data tidak tersedia");
+      return Scaffold(body: Center(child: Text("Data tidak ditemukan")));
+    }
+
+    print(ojekData); // Cek isi ojekData
+    String namaLengkap = ojekData['namaLengkap'] ?? 'Tidak ada data';
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -201,7 +321,7 @@ class _DetailojekState extends State<Detailojek> {
                   SizedBox(height: 10),
 
                   Text(
-                    'Nama Lengkap: ' + ojekData['namaLengkap'],
+                    'Nama Lengkap: ' + namaLengkap,
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.black54,
