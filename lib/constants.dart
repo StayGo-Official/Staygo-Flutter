@@ -11,6 +11,7 @@ class AppConstants {
 
   static const baseUrl = "http://192.168.18.247:5000";
   static const baseUrlImage = "http://192.168.18.247:5000/images/";
+  static const baseUrlWeb = "http://192.168.18.247:3000";
 }
 
 enum ServerStatus { normal, loading, error }

@@ -10,6 +10,14 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:staygo/repository.dart';
 import 'package:staygo/constants.dart';
 
+final Uri _playStoreUrl = Uri.parse('https://play.google.com');
+
+final Uri _kebijakanUrl =
+    Uri.parse(AppConstants.baseUrlWeb + '/kebijakan-privasi');
+
+final Uri _syaratUrl =
+    Uri.parse(AppConstants.baseUrlWeb + '/syarat-dan-ketentuan');
+
 class Profilepage extends StatefulWidget {
   final String accessToken;
   final int customerId;
@@ -81,11 +89,22 @@ class _ProfilepageState extends State<Profilepage> {
   }
 
   void _launchPlayStore() async {
-    const url = 'https://play.google.com'; // Ganti dengan URL Play Store Anda
-    if (await canLaunch(url)) {
-      await launch(url);
-    } else {
-      throw 'Could not launch $url';
+    if (!await launchUrl(_playStoreUrl)) {
+      throw Exception('Could not launch $_playStoreUrl');
+    }
+  }
+
+  // Fungsi untuk meluncurkan Kebijakan Privasi
+  void _launchKebijakanPrivasi() async {
+    if (!await launchUrl(_kebijakanUrl)) {
+      throw Exception('Could not launch $_kebijakanUrl');
+    }
+  }
+
+// Fungsi untuk meluncurkan Syarat dan Ketentuan
+  void _launchSyaratKetentuan() async {
+    if (!await launchUrl(_syaratUrl)) {
+      throw Exception('Could not launch $_syaratUrl');
     }
   }
 
@@ -386,32 +405,17 @@ class _ProfilepageState extends State<Profilepage> {
               },
             ),
             ListTile(
-              leading: Icon(Icons.business_center,
-                  color: Colors.black), // Change icon as needed
-              title: Text('StayGo for Business'),
-              trailing: Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: () {
-                // Navigate or perform actions
-              },
-            ),
+                leading: Icon(Icons.document_scanner,
+                    color: Colors.black), // Change icon as needed
+                title: Text('Syarat dan Ketentuan'),
+                trailing: Icon(Icons.arrow_forward_ios, size: 16),
+                onTap: _launchSyaratKetentuan),
             ListTile(
-              leading: Icon(Icons.document_scanner,
-                  color: Colors.black), // Change icon as needed
-              title: Text('Syarat dan Ketentuan'),
-              trailing: Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: () {
-                // Navigate or perform actions
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.privacy_tip_outlined,
-                  color: Colors.black), // Change icon as needed
-              title: Text('Kebijakan dan Privasi'),
-              trailing: Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: () {
-                // Navigate or perform actions
-              },
-            ),
+                leading: Icon(Icons.privacy_tip_outlined,
+                    color: Colors.black), // Change icon as needed
+                title: Text('Kebijakan dan Privasi'),
+                trailing: Icon(Icons.arrow_forward_ios, size: 16),
+                onTap: _launchKebijakanPrivasi),
             ListTile(
               leading: Icon(Icons.logout_outlined,
                   color: Colors.red), // Change icon as needed
