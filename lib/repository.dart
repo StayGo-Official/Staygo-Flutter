@@ -676,6 +676,9 @@ class OrderOjekRepository {
   Future<Map<String, dynamic>> addOrder({
     required String accessToken,
     required int ojekId,
+    required int harga,
+    required String lokasi,
+    required String tujuan,
   }) async {
     final url = Uri.parse('$endpoint/order-ojek');
 
@@ -686,7 +689,7 @@ class OrderOjekRepository {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $accessToken',
         },
-        body: jsonEncode({'ojekId': ojekId}),
+        body: jsonEncode({'ojekId': ojekId, 'harga': harga, 'lokasi': lokasi, 'tujuan': tujuan}),
       );
 
       // Decode respons backend
@@ -707,5 +710,121 @@ class OrderOjekRepository {
       throw Exception('Error adding order: $error');
     }
   }
+
+  Future<Map<String, dynamic>> updateOrderStatusFailed({
+    required String accessToken,
+    required int orderId,
+  }) async {
+    final url = Uri.parse('$endpoint/order-ojek-fail/$orderId');  // Use the orderId to target the correct order
+
+    try {
+      final response = await http.patch(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',  // Send the access token for authentication
+        },
+      );
+
+      // Decode the response
+      final Map<String, dynamic> decodedResponse = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        // If the request is successful, return the response
+        return {
+          'status': true,
+          'message': 'Order status updated successfully',
+        };
+      } else {
+        // If there was an error, return the error message
+        return {
+          'status': false,
+          'message': decodedResponse['message'] ?? 'Failed to update order status',
+        };
+      }
+    } catch (error) {
+      // Handle errors (e.g., no internet, server down, etc.)
+      return {
+        'status': false,
+        'message': 'Error: $error',
+      };
+    }
+  }
+
+  Future<Map<String, dynamic>> updateOrderStatusSuccess({
+    required String accessToken,
+    required int orderId,
+  }) async {
+    final url = Uri.parse('$endpoint/order-ojek-success/$orderId');  // Use the orderId to target the correct order
+
+    try {
+      final response = await http.patch(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',  // Send the access token for authentication
+        },
+      );
+
+      // Decode the response
+      final Map<String, dynamic> decodedResponse = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        // If the request is successful, return the response
+        return {
+          'status': true,
+          'message': 'Order status updated successfully',
+        };
+      } else {
+        // If there was an error, return the error message
+        return {
+          'status': false,
+          'message': decodedResponse['message'] ?? 'Failed to update order status',
+        };
+      }
+    } catch (error) {
+      // Handle errors (e.g., no internet, server down, etc.)
+      return {
+        'status': false,
+        'message': 'Error: $error',
+      };
+    }
+  }
   
+}
+
+class PaymentRepository {
+  final endpoint = AppConstants.baseUrl;
+
+  Future<MidtransResponse> createPayment({
+    required int ojekId,
+    required String nama,
+    required int price,
+  }) async {
+    final url = Uri.parse('$endpoint/create-payment');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'ojekId': ojekId,
+          'nama': nama,
+          'price': price,
+        }),
+      );
+
+      final Map<String, dynamic> decodedResponse = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        return MidtransResponse.fromJson(decodedResponse);
+      } else {
+        throw Exception('Failed to create payment');
+      }
+    } catch (error) {
+      throw Exception('Error creating payment: $error');
+    }
+  }
 }

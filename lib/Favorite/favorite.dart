@@ -363,6 +363,7 @@ class _FavoritePageState extends State<FavoritePage> {
                                     accessToken: widget.accessToken,
                                     customerId: widget.customerId,
                                     ojekId: ojekData['id'],
+                                    nama: ojekData['nama'],
                                   ),
                                   settings: RouteSettings(arguments: ojekData),
                                 ),

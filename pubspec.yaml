@@ -45,6 +45,10 @@ dependencies:
   pinput: ^5.0.0
   google_fonts: ^6.2.1
   fluttertoast: ^8.2.8
+  webview_flutter: ^4.0.6
+  midtrans_sdk: ^0.4.0
+  flutter_dotenv: ^5.1.0
+  awesome_dialog: ^3.2.1
 
 
 flutter_launcher_icons:
@@ -78,6 +82,7 @@ flutter:
   uses-material-design: true
 
   assets:
+    - .env
     - assets/
     - assets/logo.png
     - assets/profile.png
@@ -126,6 +131,7 @@ flutter:
     - assets/kost-green1.jpg
     - assets/kost-green2.jpg
     - assets/image_verifikasi.jpg
+    - assets/pay.jpg
     
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

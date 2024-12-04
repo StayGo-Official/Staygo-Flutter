@@ -320,3 +320,26 @@ class VerifyEmailResponse {
     );
   }
 }
+
+class MidtransResponse {
+  final bool status;
+  final String message;
+  final String token;
+  final String redirect_url;
+
+  MidtransResponse({
+    required this.status,
+    required this.message,
+    required this.token,
+    required this.redirect_url,
+  });
+
+  factory MidtransResponse.fromJson(Map<String, dynamic> json) {
+    return MidtransResponse(
+      status: json['status'],
+      message: json['message'], 
+      token: json['token'],
+      redirect_url: json['redirect_url'],
+    );
+  }
+}

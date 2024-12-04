@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:staygo/ojek/formpembayaran.dart';
 import 'package:staygo/repository.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:staygo/constants.dart';
-
-final Uri _whatsappUrl = Uri.parse(
-    'https://api.whatsapp.com/send?phone=6281264384767&text=Halo%20saya%20mau%20pesan%20Ojek');
 
 class Detailojek extends StatefulWidget {
   final String accessToken;
+  final String nama;
   final int customerId;
   final int ojekId;
 
   Detailojek({
     required this.accessToken,
+    required this.nama,
     required this.customerId,
     required this.ojekId,
     Key? key,
@@ -73,7 +72,7 @@ class _DetailojekState extends State<Detailojek> {
     }
   }
 
-  Future<void> _launchWhatsApp() async {
+  Future<void> _menuPembayaran() async {
     setState(() {
       isLoadingOrder = true; // Tampilkan indikator loading
     });
@@ -98,48 +97,11 @@ class _DetailojekState extends State<Detailojek> {
         },
       );
     } else {
-      try {
-        // Panggil fungsi repository
-        final response = await _repositoryOrderOjek.addOrder(
-          accessToken: widget.accessToken,
-          ojekId: widget.ojekId,
-        );
-
-        if (response['status'] == true) {
-          // Tampilkan pesan sukses
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(response['message']),
-              backgroundColor: Colors.green,
-            ),
-          );
-        } else {
-          // Jika gagal, tampilkan pesan error dari backend
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                  response['message'] ?? 'Gagal menambahkan ke order ojek'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      } catch (error) {
-        // Tangani error yang tidak diantisipasi
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Terjadi kesalahan: ${error.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      } finally {
-        setState(() {
-          isLoading = false; // Matikan indikator loading setelah selesai
-        });
-      }
-
-      if (!await launchUrl(_whatsappUrl)) {
-        throw Exception('Could not launch $_whatsappUrl');
-      }
+      
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => FormPembayaran(accessToken: widget.accessToken, customerId: widget.customerId, ojekId: widget.ojekId, nama: widget.nama)),
+      );
     }
   }
 
@@ -348,7 +310,7 @@ class _DetailojekState extends State<Detailojek> {
         child: SizedBox(
           width: double.infinity,
           child: ElevatedButton(
-            onPressed: _launchWhatsApp,
+            onPressed: _menuPembayaran,
             style: ElevatedButton.styleFrom(
               backgroundColor: Color(0xFF06283D), // Same color as given
               shape: RoundedRectangleBorder(
