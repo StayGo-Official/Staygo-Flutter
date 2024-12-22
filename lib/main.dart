@@ -60,6 +60,7 @@ class MyApp extends StatelessWidget {
           return Detailojek(
             accessToken: arguments['accessToken'] as String,
             nama: arguments['nama'] as String,
+            noHp: arguments['noHp'] as String,
             customerId: arguments['customerId'] as int,
             ojekId: arguments['ojekId'] as int,
           );

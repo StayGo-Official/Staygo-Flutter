@@ -364,6 +364,7 @@ class _FavoritePageState extends State<FavoritePage> {
                                     customerId: widget.customerId,
                                     ojekId: ojekData['id'],
                                     nama: ojekData['nama'],
+                                    noHp: ojekData['noHp'],
                                   ),
                                   settings: RouteSettings(arguments: ojekData),
                                 ),

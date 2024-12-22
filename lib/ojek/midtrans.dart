@@ -5,6 +5,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 
 class Midtrans extends StatefulWidget {
   final String url;
+  final String noHp;
   final int customerId;
   final String accessToken;
   final int orderId;
@@ -12,6 +13,7 @@ class Midtrans extends StatefulWidget {
   const Midtrans(
       {Key? key,
       required this.url,
+      required this.noHp,
       required this.customerId,
       required this.accessToken,
       required this.orderId,})
@@ -69,7 +71,7 @@ class _MidtransState extends State<Midtrans> {
                 context,
                 MaterialPageRoute(
                   builder: (context) {
-                    return PaymentSuccess(accessToken: widget.accessToken, orderId: widget.orderId, customerId: widget.customerId,);
+                    return PaymentSuccess(accessToken: widget.accessToken, orderId: widget.orderId, customerId: widget.customerId, noHp: widget.noHp,);
                   },
                 ),
               );

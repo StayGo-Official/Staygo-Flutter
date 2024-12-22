@@ -10,12 +10,14 @@ import 'package:google_fonts/google_fonts.dart';
 class FormPembayaran extends StatefulWidget {
   final String accessToken;
   final String nama;
+  final String noHp;
   final int customerId;
   final int ojekId;
 
   FormPembayaran({
     required this.accessToken,
     required this.nama,
+    required this.noHp,
     required this.customerId,
     required this.ojekId,
     Key? key,
@@ -242,6 +244,7 @@ class _FormPembayaranState extends State<FormPembayaran> {
             builder: (context) => Midtrans(
               url: response.redirect_url,
               accessToken: widget.accessToken,
+              noHp: widget.noHp,
               customerId: widget.customerId,
               orderId: orderId,
             ),

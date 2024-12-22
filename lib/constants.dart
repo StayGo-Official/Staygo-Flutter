@@ -9,9 +9,9 @@ class AppConstants {
   static const primary = Color.fromARGB(255, 21, 201, 48);
   static const danger = Color.fromRGBO(227, 32, 32, 1);
 
-  static const baseUrl = "http://192.168.18.247:5000";
-  static const baseUrlImage = "http://192.168.18.247:5000/images/";
-  static const baseUrlWeb = "http://192.168.18.247:3000";
+  static const baseUrl = "https://api-staygo.tonexus.my.id";
+  static const baseUrlImage = "https://api-staygo.tonexus.my.id/images/";
+  static const baseUrlWeb = "https://staygo-com.preview-domain.com";
 }
 
 enum ServerStatus { normal, loading, error }

@@ -6,15 +6,13 @@ import 'package:staygo/navigationBottom.dart';
 import 'package:staygo/repository.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-final Uri _whatsappUrl = Uri.parse(
-    'https://api.whatsapp.com/send?phone=6281264384767&text=Halo%20saya%20mau%20pesan%20Ojek');
-
 class PaymentSuccess extends StatefulWidget {
   final String accessToken;
+  final String noHp;
   final int orderId;
   final int customerId;
   
-  const PaymentSuccess({Key? key, required this.accessToken, required this.orderId, required this.customerId}) : super(key: key);
+  const PaymentSuccess({Key? key, required this.accessToken, required this.noHp, required this.orderId, required this.customerId}) : super(key: key);
 
   @override
   State<PaymentSuccess> createState() => _PaymentSuccessState();
@@ -22,6 +20,7 @@ class PaymentSuccess extends StatefulWidget {
 
 class _PaymentSuccessState extends State<PaymentSuccess> {
   bool _isDialogShown = false;
+  late Uri _whatsappUrl;
 
   Future<void> _updateOrderStatusToSuccess() async {
     final orderRepository = OrderOjekRepository();
@@ -45,6 +44,11 @@ class _PaymentSuccessState extends State<PaymentSuccess> {
   @override
   void initState() {
     super.initState();
+
+    _whatsappUrl = Uri.parse(
+      'https://api.whatsapp.com/send?phone=${widget.noHp}&text=Halo%20saya%20mau%20pesan%20Ojek'
+    );
+    
     if (!_isDialogShown) {
       _isDialogShown = true;
       // Menampilkan dialog setelah frame pertama selesai

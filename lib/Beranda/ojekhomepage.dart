@@ -1,7 +1,7 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, unused_element
 
 import 'package:flutter/material.dart';
-import 'package:staygo/ojek/detailojek.dart';
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:staygo/constants.dart';
 import 'package:staygo/models.dart';
 import 'package:staygo/repository.dart';
@@ -429,6 +429,7 @@ class _OjekhomepageState extends State<Ojekhomepage> {
                                           'nama': ojek.nama,
                                           'namaLengkap': ojek.namaLengkap,
                                           'alamat': ojek.alamat,
+                                          'noHp': ojek.noHp,
                                           'status': ojek.status,
                                           'gender': ojek.gender,
                                           'images': ojek.images,
@@ -590,20 +591,15 @@ class _OjekhomepageState extends State<Ojekhomepage> {
                                 ),
                                 GestureDetector(
                                   onTap: () {
-                                    Navigator.of(context).popAndPushNamed(
-                                      '/detail-ojek',
-                                      arguments: {
-                                        'ojekId': ojek.id,
-                                        'nama': ojek.nama,
-                                        'namaLengkap': ojek.namaLengkap,
-                                        'alamat': ojek.alamat,
-                                        'status': ojek.status,
-                                        'gender': ojek.gender,
-                                        'images': ojek.images,
-                                        'accessToken': widget.accessToken,
-                                        'customerId': widget.customerId,
-                                      },
-                                    );
+                                    AwesomeDialog(
+                                        context: context,
+                                        dialogType: DialogType.warning,
+                                        animType: AnimType.rightSlide,
+                                        title: 'Maintenance',
+                                        desc:
+                                            'Maaf Untuk Pemesanan Makanan sedang tahap pengembangan',
+                                        btnOkOnPress: () {})
+                                      ..show();
                                   },
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.start,

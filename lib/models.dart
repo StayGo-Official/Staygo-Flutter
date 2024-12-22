@@ -60,6 +60,7 @@ class Ojek {
   String nama;
   String namaLengkap;
   String alamat;
+  String noHp;
   bool status;
   bool isRide;
   bool isFood;
@@ -74,6 +75,7 @@ class Ojek {
     required this.nama,
     required this.namaLengkap,
     required this.alamat,
+    required this.noHp,
     required this.status,
     required this.isRide,
     required this.isFood,
@@ -90,6 +92,7 @@ class Ojek {
       nama: json['nama'],
       namaLengkap: json['namaLengkap'],
       alamat: json['alamat'],
+      noHp: json['noHp'],
       status: json['status'],
       isRide: json['isRide'],
       isFood: json['isFood'],

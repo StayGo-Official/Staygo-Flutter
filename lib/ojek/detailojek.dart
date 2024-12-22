@@ -6,12 +6,14 @@ import 'package:staygo/constants.dart';
 class Detailojek extends StatefulWidget {
   final String accessToken;
   final String nama;
+  final String noHp;
   final int customerId;
   final int ojekId;
 
   Detailojek({
     required this.accessToken,
     required this.nama,
+    required this.noHp,
     required this.customerId,
     required this.ojekId,
     Key? key,
@@ -76,6 +78,8 @@ class _DetailojekState extends State<Detailojek> {
     setState(() {
       isLoadingOrder = true; // Tampilkan indikator loading
     });
+    final Map<String, dynamic> ojekData = 
+          ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
 
     if (!isVerified) {
       // Show alert dialog asking the user to verify their email
@@ -100,7 +104,7 @@ class _DetailojekState extends State<Detailojek> {
       
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => FormPembayaran(accessToken: widget.accessToken, customerId: widget.customerId, ojekId: widget.ojekId, nama: widget.nama)),
+        MaterialPageRoute(builder: (context) => FormPembayaran(accessToken: widget.accessToken, customerId: widget.customerId, ojekId: widget.ojekId, nama: widget.nama, noHp: ojekData['noHp'] ?? '',)),
       );
     }
   }
